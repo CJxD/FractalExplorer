@@ -35,6 +35,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.cjwatts.fractalexplorer.main.algorithms.*;
+import com.cjwatts.fractalexplorer.main.render.ConcurrentRenderer;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class FractalExplorer extends JFrame {
@@ -70,8 +71,10 @@ public class FractalExplorer extends JFrame {
         content.setBorder(new EmptyBorder(5, 5, 5, 5));
         
         // Generate major fractal panel
-        majorFractal = new FractalPanel(new MandelbrotAlgorithm(iterationCount, escapeRadius));
-        majorFractal.setColourScheme(FractalColourScheme.DEFAULT);
+        majorFractal = new FractalPanel(
+                            new ConcurrentRenderer(
+                                    new MandelbrotAlgorithm(iterationCount, escapeRadius)));
+        majorFractal.getRenderer().setColourScheme(FractalColourScheme.DEFAULT);
         
         // Put the fractal in a wrapper for simple full screening
         fractalWrapper = new JPanel();
@@ -80,8 +83,10 @@ public class FractalExplorer extends JFrame {
         
         // Generate minor fractal pattern
         Complex initSeed = new Complex(0, 0);
-        minorFractal = new FractalPanel(new JuliaAlgorithm(initSeed, iterationCount, escapeRadius));
-        minorFractal.setColourScheme(FractalColourScheme.DEFAULT);
+        minorFractal = new FractalPanel(
+                            new ConcurrentRenderer(
+                                    new JuliaAlgorithm(initSeed, iterationCount, escapeRadius)));
+        minorFractal.getRenderer().setColourScheme(FractalColourScheme.DEFAULT);
         
         // Generate coordinate labels
         final JLabel hoverCoords = new JLabel();
@@ -102,7 +107,7 @@ public class FractalExplorer extends JFrame {
         // Add the algorithms to the combo box
         algorithm.addItem("Mandelbrot");
         algorithm.addItem("Burning Ship");
-        algorithm.setSelectedItem(majorFractal.getAlgorithm().getName());
+        algorithm.setSelectedItem(majorFractal.getRenderer().getAlgorithm().getName());
         
         // Generate iteration control
         JLabel lblIterations = new JLabel("Iterations");
@@ -162,18 +167,18 @@ public class FractalExplorer extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 // Reset ALL graph attributes (except algorithm)
                 iterationCount = (Integer) iterations.getValue();
-                majorFractal.getAlgorithm().setIterations(iterationCount);
-                minorFractal.getAlgorithm().setIterations(iterationCount);
-                majorFractal.setComplexBounds((Double) realFrom.getValue(), (Double) realTo.getValue(), (Double) imaginaryFrom.getValue(), (Double) imaginaryTo.getValue());
+                majorFractal.getRenderer().getAlgorithm().setIterations(iterationCount);
+                minorFractal.getRenderer().getAlgorithm().setIterations(iterationCount);
+                majorFractal.getRenderer().setComplexBounds((Double) realFrom.getValue(), (Double) realTo.getValue(), (Double) imaginaryFrom.getValue(), (Double) imaginaryTo.getValue());
             }
             
             @Override
             public void itemStateChanged(ItemEvent e) {
                 // Update algorithm
                 if (algorithm.getSelectedItem().equals("Mandelbrot")) {
-                    majorFractal.setAlgorithm(new MandelbrotAlgorithm(iterationCount, escapeRadius));
+                    majorFractal.getRenderer().setAlgorithm(new MandelbrotAlgorithm(iterationCount, escapeRadius));
                 } else if (algorithm.getSelectedItem().equals("Burning Ship")) {
-                    majorFractal.setAlgorithm(new BurningShipAlgorithm(iterationCount, escapeRadius));
+                    majorFractal.getRenderer().setAlgorithm(new BurningShipAlgorithm(iterationCount, escapeRadius));
                 }
             }
         }
@@ -191,7 +196,7 @@ public class FractalExplorer extends JFrame {
             
             @Override
             public void actionPerformed(ActionEvent e) {
-                majorFractal.setComplexBounds(-2.0, 2.0, -1.6, 1.6);
+                majorFractal.getRenderer().setComplexBounds(-2.0, 2.0, -1.6, 1.6);
             }
         });
         
@@ -212,17 +217,17 @@ public class FractalExplorer extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String scheme = (String) colourScheme.getSelectedItem();
                 if (scheme.equals("Default")) {
-                    majorFractal.setColourScheme(FractalColourScheme.DEFAULT);
-                    minorFractal.setColourScheme(FractalColourScheme.DEFAULT);
+                    majorFractal.getRenderer().setColourScheme(FractalColourScheme.DEFAULT);
+                    minorFractal.getRenderer().setColourScheme(FractalColourScheme.DEFAULT);
                 } else if (scheme.equals("Blue Sky")) {
-                    majorFractal.setColourScheme(FractalColourScheme.BLUE_SKY);
-                    minorFractal.setColourScheme(FractalColourScheme.BLUE_SKY);
+                    majorFractal.getRenderer().setColourScheme(FractalColourScheme.BLUE_SKY);
+                    minorFractal.getRenderer().setColourScheme(FractalColourScheme.BLUE_SKY);
                 } else if (scheme.equals("Red Sky")) {
-                    majorFractal.setColourScheme(FractalColourScheme.RED_SKY);
-                    minorFractal.setColourScheme(FractalColourScheme.RED_SKY);
+                    majorFractal.getRenderer().setColourScheme(FractalColourScheme.RED_SKY);
+                    minorFractal.getRenderer().setColourScheme(FractalColourScheme.RED_SKY);
                 } else if (scheme.equals("Sea of Gold")) {
-                    majorFractal.setColourScheme(FractalColourScheme.SEA_OF_GOLD);
-                    minorFractal.setColourScheme(FractalColourScheme.SEA_OF_GOLD);
+                    majorFractal.getRenderer().setColourScheme(FractalColourScheme.SEA_OF_GOLD);
+                    minorFractal.getRenderer().setColourScheme(FractalColourScheme.SEA_OF_GOLD);
                 }
             }
         });
@@ -245,8 +250,8 @@ public class FractalExplorer extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 // Spawn a new julia algorithm at the selected coordinates
-                Complex coords = fractal.getCartesian(e.getX(), e.getY());
-                minorFractal.setAlgorithm(new JuliaAlgorithm(coords, iterationCount, escapeRadius));
+                Complex coords = fractal.getRenderer().getCartesian(e.getX(), e.getY());
+                minorFractal.getRenderer().setAlgorithm(new JuliaAlgorithm(coords, iterationCount, escapeRadius));
                 selectedCoords.setText(coords.round(3).toString());
                 
                 // Start a possible drag operation
@@ -261,7 +266,7 @@ public class FractalExplorer extends JFrame {
                 Graphics g = fractal.getGraphics();
                 fractal.repaint();
                 
-                Color c = fractal.getColourScheme().getGridlineColour();
+                Color c = fractal.getRenderer().getColourScheme().getGridlineColour();
                 g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
                 
                 // Draw crosshairs around the mouse's current point
@@ -269,7 +274,7 @@ public class FractalExplorer extends JFrame {
                 g.drawLine(0, e.getY(), fractal.getWidth(), e.getY());
                 
                 // Update the coordinate text
-                Complex coords = fractal.getCartesian(e.getX(), e.getY());
+                Complex coords = fractal.getRenderer().getCartesian(e.getX(), e.getY());
                 hoverCoords.setText(coords.round(3).toString());
             }
             
@@ -285,7 +290,7 @@ public class FractalExplorer extends JFrame {
                 Graphics2D g2 = (Graphics2D) fractal.getGraphics();
                 fractal.repaint();
                 
-                Color c = fractal.getColourScheme().getGridlineColour();
+                Color c = fractal.getRenderer().getColourScheme().getGridlineColour();
                 g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
                 
                 g2.fill(zoomArea);
@@ -299,11 +304,11 @@ public class FractalExplorer extends JFrame {
                 if (zoomArea != null) {
                     // Get rectangle vertices as complex numbers
                     // Min x and min y
-                    Complex point1 = fractal.getCartesian(zoomArea.x, zoomArea.y);
+                    Complex point1 = fractal.getRenderer().getCartesian(zoomArea.x, zoomArea.y);
                     // Max x and max y
-                    Complex point2 = fractal.getCartesian(zoomArea.x + zoomArea.width, zoomArea.y + zoomArea.height);
+                    Complex point2 = fractal.getRenderer().getCartesian(zoomArea.x + zoomArea.width, zoomArea.y + zoomArea.height);
                     
-                    fractal.setComplexBounds(point1, point2);
+                    fractal.getRenderer().setComplexBounds(point1, point2);
                     
                     // Reset zoom area
                     zoomArea = null;
