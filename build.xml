@@ -15,6 +15,10 @@
 		<antcall target="dist" />
 	</target>
 	
+	<target name="buildtest" depends="init" description="Compile the source for testing">
+		<javac srcdir="${src}" destdir="${bin}" includeantruntime="false"></javac>
+	</target>
+	
     <target name="dist" description="Create the jar">
         <jar jarfile="${bin}/Fractal Explorer.jar" basedir="${bin}" filesetmanifest="mergewithoutmain">
             <manifest>
