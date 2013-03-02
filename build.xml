@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="Fractal Explorer" default="build">
+	<!-- Global properties -->
+	<property name="src" location="src" />
+	<property name="bin" location="bin" />
+	
+	<target name="init" depends="clean" description="Refresh the bin directory">
+		<mkdir dir="${bin}" />
+	</target>
+	
+	<target name="build" depends="init" description="Compile the source">
+		<javac srcdir="${src}" destdir="${bin}" includeantruntime="false">
+			<exclude name="**/fractalexplorer/test/*.java" />
+		</javac>
+		<antcall target="dist" />
+	</target>
+	
+    <target name="dist" description="Create the jar">
+        <jar jarfile="${bin}/Fractal Explorer.jar" basedir="${bin}" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="com.cjwatts.fractalexplorer.main.FractalExplorer"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+        </jar>
+    </target>
+	
+	<target name="clean" description="Clean up">
+		<delete dir="${bin}" />
+	</target>
+</project>
