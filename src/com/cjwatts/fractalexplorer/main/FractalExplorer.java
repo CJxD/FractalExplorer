@@ -1,10 +1,7 @@
 package com.cjwatts.fractalexplorer.main;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
@@ -25,7 +22,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.GroupLayout.Alignment;
@@ -35,7 +31,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.cjwatts.fractalexplorer.main.algorithms.*;
+import com.cjwatts.fractalexplorer.main.util.AxisSpinner;
 import com.cjwatts.fractalexplorer.main.util.Complex;
+import com.cjwatts.fractalexplorer.main.util.IterationSpinner;
 
 public class FractalExplorer extends JFrame {
     
@@ -106,7 +104,7 @@ public class FractalExplorer extends JFrame {
         
         // Generate iteration control
         JLabel lblIterations = new JLabel("Iterations");
-        final JSpinner iterations = new JSpinner();
+        final IterationSpinner iterations = new IterationSpinner();
         iterations.setValue(iterationCount);
         
         // Generate axes control
@@ -115,16 +113,10 @@ public class FractalExplorer extends JFrame {
         JLabel lblImaginary = new JLabel("Imaginary Axis");
         JLabel lblImaginaryTo = new JLabel("to");
         
-        final JSpinner realFrom = new JSpinner();
-        final JSpinner realTo = new JSpinner();
-        final JSpinner imaginaryFrom = new JSpinner();
-        final JSpinner imaginaryTo = new JSpinner();
-        
-        // Format axes spinners
-        ((JSpinner.NumberEditor) realFrom.getEditor()).getFormat().setMinimumFractionDigits(2);
-        ((JSpinner.NumberEditor) realTo.getEditor()).getFormat().setMinimumFractionDigits(2);
-        ((JSpinner.NumberEditor) imaginaryFrom.getEditor()).getFormat().setMinimumFractionDigits(2);
-        ((JSpinner.NumberEditor) imaginaryTo.getEditor()).getFormat().setMinimumFractionDigits(2);
+        final AxisSpinner realFrom = new AxisSpinner();
+        final AxisSpinner realTo = new AxisSpinner();
+        final AxisSpinner imaginaryFrom = new AxisSpinner();
+        final AxisSpinner imaginaryTo = new AxisSpinner(); 
         
         realFrom.setValue(-2.00);
         realTo.setValue(2.00);
@@ -161,10 +153,10 @@ public class FractalExplorer extends JFrame {
             @Override
             public void stateChanged(ChangeEvent e) {
                 // Reset ALL graph attributes (except algorithm)
-                iterationCount = (Integer) iterations.getValue();
+                iterationCount = iterations.getInteger();
                 majorFractal.getAlgorithm().setIterations(iterationCount);
                 minorFractal.getAlgorithm().setIterations(iterationCount);
-                majorFractal.setComplexBounds((Double) realFrom.getValue(), (Double) realTo.getValue(), (Double) imaginaryFrom.getValue(), (Double) imaginaryTo.getValue());
+                majorFractal.setComplexBounds(realFrom.getDouble(), realTo.getDouble(), imaginaryFrom.getDouble(), imaginaryTo.getDouble());
             }
             
             @Override
@@ -188,20 +180,21 @@ public class FractalExplorer extends JFrame {
         
         // View reset
         resetView.addActionListener(new ActionListener() {
-            
             @Override
             public void actionPerformed(ActionEvent e) {
-                majorFractal.setComplexBounds(-2.0, 2.0, -1.6, 1.6);
+                realFrom.setValue(FractalPanel.DEFAULT_REAL_MIN);
+                realTo.setValue(FractalPanel.DEFAULT_REAL_MAX);
+                imaginaryFrom.setValue(FractalPanel.DEFAULT_IMAGINARY_MIN);
+                imaginaryTo.setValue(FractalPanel.DEFAULT_IMAGINARY_MAX);
             }
         });
         
-        // View fullscreen
-        // final FullScreen fs = new FullScreen();
+        // View full screen
+        final FullScreen fs = new FullScreen();
         fullScreen.addActionListener(new ActionListener() {
-            
             @Override
             public void actionPerformed(ActionEvent e) {
-                new FullScreen().enterFullScreen();
+                fs.enterFullScreen();
             }
         });
         
@@ -258,16 +251,8 @@ public class FractalExplorer extends JFrame {
              */
             @Override
             public void mouseMoved(MouseEvent e) {
-                Graphics g = fractal.getGraphics();
-                fractal.repaint();
-                
-                Color c = fractal.getColourScheme().getGridlineColour();
-                g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
-                
-                // Draw crosshairs around the mouse's current point
-                g.drawLine(e.getX(), 0, e.getX(), fractal.getHeight());
-                g.drawLine(0, e.getY(), fractal.getWidth(), e.getY());
-                
+                fractal.paintCrosshairs(e.getPoint());
+
                 // Update the coordinate text
                 Complex coords = fractal.getCartesian(e.getX(), e.getY());
                 hoverCoords.setText(coords.round(3).toString());
@@ -282,13 +267,7 @@ public class FractalExplorer extends JFrame {
                 zoomArea = new Rectangle(dragStart);
                 zoomArea.add(e.getPoint());
                 
-                Graphics2D g2 = (Graphics2D) fractal.getGraphics();
-                fractal.repaint();
-                
-                Color c = fractal.getColourScheme().getGridlineColour();
-                g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
-                
-                g2.fill(zoomArea);
+                fractal.paintZoom(zoomArea);
             }
             
             /*
@@ -296,17 +275,27 @@ public class FractalExplorer extends JFrame {
              */
             @Override
             public void mouseReleased(MouseEvent e) {
+                // Make sure zoom area isn't a ridiculously small size
                 if (zoomArea != null) {
-                    // Get rectangle vertices as complex numbers
-                    // Min x and min y
-                    Complex point1 = fractal.getCartesian(zoomArea.x, zoomArea.y);
-                    // Max x and max y
-                    Complex point2 = fractal.getCartesian(zoomArea.x + zoomArea.width, zoomArea.y + zoomArea.height);
-                    
-                    fractal.setComplexBounds(point1, point2);
-                    
-                    // Reset zoom area
-                    zoomArea = null;
+                    // Make sure zoom area isn't a ridiculously small size
+                    Dimension size = zoomArea.getSize();
+                    if (size.getWidth() * size.getHeight() > 50) {
+                        // Get rectangle vertices as complex numbers
+                        // Min x and min y
+                        Complex point1 = fractal.getCartesian(zoomArea.x, zoomArea.y);
+                        // Max x and max y
+                        Complex point2 = fractal.getCartesian(zoomArea.x + zoomArea.width, zoomArea.y + zoomArea.height);
+                        
+                        // Set the viewport via the AxisSpinners (to update both spinners and graph)
+                        realFrom.setValue(point1.real());
+                        realTo.setValue(point2.real());
+                        imaginaryFrom.setValue(point1.imaginary());
+                        imaginaryTo.setValue(point2.imaginary());
+                        
+                        // Reset zoom area
+                        zoomArea = null;
+                        fractal.paintZoom(zoomArea);
+                    }
                 }
             }
         }
@@ -384,6 +373,10 @@ public class FractalExplorer extends JFrame {
                 fractalWrapper.add(majorFractal);
                 // Disable full screen
                 device.setFullScreenWindow(null);
+                // Dispose frame
+                frame.dispose();
+                // Revalidate window
+                FractalExplorer.this.validate();
                 isFullScreen = false;
             }
         }
