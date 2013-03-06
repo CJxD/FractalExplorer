@@ -38,9 +38,11 @@ public abstract class FractalAlgorithm {
     protected double normalise(Complex c, int d) {
         if (d == iterations) {
         	return iterations;
+        } else if (d == 0) {
+        	return 0;
         } else {
         	double modSquared = c.modulusSquared();
-        	return d - (Math.log(Math.log(modSquared))) / (iterations * LOG_2);
+        	return (d - (Math.log(Math.log(modSquared))) / LOG_2) / iterations;
         }
     }
     

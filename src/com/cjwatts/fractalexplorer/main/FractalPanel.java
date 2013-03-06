@@ -7,7 +7,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.util.Map;
 
 import javax.swing.JPanel;
 
