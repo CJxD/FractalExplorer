@@ -1,7 +1,5 @@
 package com.cjwatts.fractalexplorer.main.algorithms;
 
-import java.util.Map;
-
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public abstract class FractalAlgorithm {
@@ -10,19 +8,41 @@ public abstract class FractalAlgorithm {
     protected double escapeRadius;
     protected double escapeSquared;
     
+    private static final double LOG_2 = Math.log(2);
+    
     public FractalAlgorithm(int iterations, double escapeRadius) {
         setIterations(iterations);
         setEscapeRadius(escapeRadius);
     }
     
     /**
-     * Calculates the first divergence in the fractal
-     * set for a given complex number.
+     * Calculates whether or not the complex number is in the fractal set.
+     * 
+     * For complex numbers not inside the set, a ratio between
+     * first divergence and maximum iteration count [0, 1) is returned.
      * 
      * @param seed
-     * @return First diverging complex number in set and its iteration count
+     * @return 0 for instant divergence, 1 for never diverges
      */
-    public abstract Map.Entry<Complex, Integer> firstDivergence(Complex seed);
+    public abstract double divergenceRatio(Complex seed);
+    
+    /**
+     * Helper method for finding the Normalisation Iteration Count.
+     * This enables a smooth gradient for the divergence ratio
+     * 
+     * @param c The diverging complex number
+     * @param d The divergence iteration count
+     * 
+     * @see <a href="http://linas.org/art-gallery/escape/escape.html">http://linas.org/art-gallery/escape/escape.html</a>
+     */
+    protected double normalise(Complex c, int d) {
+        if (d == iterations) {
+        	return iterations;
+        } else {
+        	double modSquared = c.modulusSquared();
+        	return d - (Math.log(Math.log(modSquared))) / (iterations * LOG_2);
+        }
+    }
     
     /**
      * @return Name of the algorithm

@@ -1,8 +1,5 @@
 package com.cjwatts.fractalexplorer.main.algorithms;
 
-import java.util.AbstractMap;
-import java.util.Map;
-
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class MandelbrotAlgorithm extends FractalAlgorithm {
@@ -14,7 +11,7 @@ public class MandelbrotAlgorithm extends FractalAlgorithm {
     }
     
     @Override
-    public Map.Entry<Complex, Integer> firstDivergence(Complex seed) {
+    public double divergenceRatio(Complex seed) {
         Complex current = seed;
         
         // Keep iterating until either n is reached or divergence is found
@@ -25,7 +22,7 @@ public class MandelbrotAlgorithm extends FractalAlgorithm {
             i++;
         }
         
-        return new AbstractMap.SimpleEntry<Complex, Integer>(current, i);
+        return normalise(current, i);
     }
     
     @Override

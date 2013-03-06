@@ -3,6 +3,8 @@ package com.cjwatts.fractalexplorer.main;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Map;
@@ -16,10 +18,19 @@ public class FractalPanel extends JPanel {
     
     private static final long serialVersionUID = 1L;
     
-    private Double xmin = -2.0;
-    private Double xmax = 2.0;
-    private Double ymin = -1.6;
-    private Double ymax = 1.6;
+    public static final double DEFAULT_REAL_MIN = -2.0;
+    public static final double DEFAULT_REAL_MAX = 2.0;
+    public static final double DEFAULT_IMAGINARY_MIN = -1.6;
+    public static final double DEFAULT_IMAGINARY_MAX = 1.6;
+    
+    private double xmin = DEFAULT_REAL_MIN;
+    private double xmax = DEFAULT_REAL_MAX;
+    private double ymin = DEFAULT_IMAGINARY_MIN;
+    private double ymax = DEFAULT_IMAGINARY_MAX;
+    
+    // Put crosshairs and zoom rectangle off-screen
+    private Point crosshairs;
+    private Rectangle zoom;
     
     private FractalAlgorithm algorithm;
     private FractalColourScheme scheme = FractalColourScheme.DEFAULT;
@@ -52,16 +63,34 @@ public class FractalPanel extends JPanel {
             }
         }
         
+        // Draw the fractal
         g2.drawImage(cache.getImage(), 0, 0, width, height, null);
+        
+        Color c = scheme.getGridlineColour();
+        g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 80));
+        
+        // Draw crosshairs
+        if (crosshairs != null) {
+            g2.drawLine(crosshairs.x, 0, crosshairs.x, this.getHeight());
+            g2.drawLine(0, crosshairs.y, this.getWidth(), crosshairs.y);
+            
+            // Crosshair coordinate text
+            g2.drawString(
+                    getCartesian(crosshairs.x, crosshairs.y).round(3).toString(),
+                    crosshairs.x + 15,
+                    crosshairs.y + 15);
+        }
+        
+        // Draw zoom rectangle
+        if (zoom != null) {
+            g2.fill(zoom);
+        }
     }
     
     /**
      * Data structure to hold cached renders
      */
     protected class RenderCache {
-        
-        // Hash code has to be double because of the
-        // huge range of Cartesian coordinate values
         int hashCode;
         BufferedImage image;
         
@@ -78,10 +107,10 @@ public class FractalPanel extends JPanel {
                 hash = hash * 37 + scheme.hashCode();
             } catch (NullPointerException ignore) {
             }
-            hash = hash * 41 + xmin.hashCode();
-            hash = hash * 43 + xmax.hashCode();
-            hash = hash * 47 + ymin.hashCode();
-            hash = hash * 53 + ymax.hashCode();
+            hash = hash * 41 + new Double(xmin).hashCode();
+            hash = hash * 43 + new Double(xmax).hashCode();
+            hash = hash * 47 + new Double(ymin).hashCode();
+            hash = hash * 53 + new Double(ymax).hashCode();
             hash = hash * 59 + getWidth();
             hash = hash * 61 + getHeight();
             return hash;
@@ -240,34 +269,25 @@ public class FractalPanel extends JPanel {
         // Get complex Cartesian coordinates
         Complex coords = getCartesian(x, y);
         
-        // Get the iteration divergence
-        Map.Entry<Complex, Integer> d = algorithm.firstDivergence(coords);
-        
-        // Use Normalised Iteration Count to get a smoother, non-interger
-        // gradient
-        // See: http://linas.org/art-gallery/escape/escape.html
-        double modSquared = d.getKey().modulusSquared();
-        Double mu = d.getValue() - (Math.log(Math.log(modSquared))) / Math.log(2);
-        
-        // Iteration count hit maximum
-        if (mu.equals(Double.NaN))
-            mu = (double) algorithm.getIterations();
-        
-        return scheme.calculateColour(mu / algorithm.getIterations());
+        return scheme.calculateColour(algorithm.divergenceRatio(coords));
     }
     
     /**
-     * Cancel the current calculation and return to previous state
+     * Paints crosshairs at the given location
+     * If null, crosshairs are not drawn
      */
-    public void cancelOperation() {
-        
+    public void paintCrosshairs(Point p) {
+        this.crosshairs = p;
+        this.repaint();
     }
     
     /**
-     * @return Percentage progress of current operations. -1 if nothing is running.
+     * Paints zoom rectangle
+     * If null, zoom rectangle is not drawn
      */
-    public int progress() {
-        return this.progress();
+    public void paintZoom(Rectangle r) {
+        this.zoom = r;
+        this.repaint();
     }
     
     /**
@@ -304,7 +324,7 @@ public class FractalPanel extends JPanel {
      * @param ymin
      * @param ymax
      */
-    public void setComplexBounds(Double xmin, Double xmax, Double ymin, Double ymax) {
+    public void setComplexBounds(double xmin, double xmax, double ymin, double ymax) {
         this.xmin = xmin;
         this.xmax = xmax;
         this.ymin = ymin;

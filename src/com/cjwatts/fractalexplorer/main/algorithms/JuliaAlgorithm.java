@@ -1,8 +1,5 @@
 package com.cjwatts.fractalexplorer.main.algorithms;
 
-import java.util.AbstractMap;
-import java.util.Map;
-
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class JuliaAlgorithm extends FractalAlgorithm {
@@ -16,7 +13,7 @@ public class JuliaAlgorithm extends FractalAlgorithm {
     }
     
     @Override
-    public Map.Entry<Complex, Integer> firstDivergence(Complex point) {
+    public double divergenceRatio(Complex point) {
         Complex current = point;
         
         // Keep iterating until either n is reached or divergence is found
@@ -27,7 +24,7 @@ public class JuliaAlgorithm extends FractalAlgorithm {
             i++;
         }
         
-        return new AbstractMap.SimpleEntry<Complex, Integer>(current, i);
+        return normalise(current, i);
     }
     
     @Override

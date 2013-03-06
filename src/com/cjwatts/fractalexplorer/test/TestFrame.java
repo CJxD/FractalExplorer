@@ -80,7 +80,7 @@ public class TestFrame extends JFrame {
         
         // Generate algorithm chooser
         JLabel lblAlgorithm = new JLabel("Algorithm");
-        final JComboBox<String> algorithm = new JComboBox<String>();
+        final JComboBox algorithm = new JComboBox();
         // Add the algorithms to the combo box
         algorithm.addItem("Mandelbrot");
         algorithm.addItem("Burning Ship");
@@ -116,7 +116,7 @@ public class TestFrame extends JFrame {
         // Generate colour scheme editor
         JPanel colourSchemePanel = new JPanel();
         JLabel lblColourScheme = new JLabel("Colour Scheme");
-        JComboBox<String> colourScheme = new JComboBox<String>();
+        JComboBox colourScheme = new JComboBox();
         
         GroupLayout controlLayout = new GroupLayout(controls);
         controlLayout.setHorizontalGroup(controlLayout.createParallelGroup(Alignment.LEADING).addGroup(controlLayout.createSequentialGroup().addGroup(controlLayout.createParallelGroup(Alignment.LEADING).addComponent(lblAlgorithm).addGroup(controlLayout.createSequentialGroup().addContainerGap().addComponent(algorithm, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)).addComponent(lblIterations).addGroup(controlLayout.createSequentialGroup().addContainerGap().addComponent(iterations, GroupLayout.PREFERRED_SIZE, 63, GroupLayout.PREFERRED_SIZE))).addGap(38).addGroup(controlLayout.createParallelGroup(Alignment.LEADING).addGroup(controlLayout.createSequentialGroup().addComponent(realFrom, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.RELATED).addComponent(lblRealTo).addPreferredGap(ComponentPlacement.RELATED).addComponent(realTo, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)).addComponent(lblReal).addComponent(lblImaginary).addGroup(controlLayout.createSequentialGroup().addComponent(imaginaryTo, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.RELATED).addComponent(lblImaginaryTo).addPreferredGap(ComponentPlacement.RELATED).addComponent(imaginaryFrom, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
