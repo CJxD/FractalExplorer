@@ -40,7 +40,7 @@ public abstract class FractalAlgorithm {
         	return iterations;
         } else {
         	double modSquared = c.modulusSquared();
-        	return d - (Math.log(Math.log(modSquared))) / (iterations * LOG_2);
+        	return (d - (Math.log(Math.log(modSquared))) / LOG_2) / iterations;
         }
     }
     

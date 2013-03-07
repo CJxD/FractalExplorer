@@ -150,7 +150,7 @@ public class FractalPanel extends JPanel {
      */
     public class Renderer extends Thread {
         
-        private static final int MAX_TILE_AREA = 2000;
+        public static final int MAX_TILE_AREA = 2000;
         
         protected int x1, y1, x2, y2;
         
@@ -241,20 +241,24 @@ public class FractalPanel extends JPanel {
         int width = this.getWidth();
         int height = this.getHeight();
         
-        // Move the graph into the centre of the container
-        double calcX = x - width / 2;
-        double calcY = y - height / 2;
-        
-        // Scale the axes
-        calcX *= (xmax - xmin) / width;
-        calcY *= (ymax - ymin) / height;
-        
-        // Calculate zoom offsets
-        // Add the average of the x and y space
-        calcX += (xmin + xmax) / 2;
-        calcY += (ymin + ymax) / 2;
-        
-        return new Complex(calcX, calcY);
+        if (width == 0 || height == 0) {
+        	throw new IllegalStateException("Fractal panel does not have valid dimensions. Width:" + width + " Height:" + height);
+        } else {
+	        // Move the graph into the centre of the container
+	        double calcX = x - width / 2;
+	        double calcY = y - height / 2;
+	        
+	        // Scale the axes
+	        calcX *= (xmax - xmin) / width;
+	        calcY *= (ymax - ymin) / height;
+	        
+	        // Calculate zoom offsets
+	        // Add the average of the x and y space
+	        calcX += (xmin + xmax) / 2;
+	        calcY += (ymin + ymax) / 2;
+	        
+	        return new Complex(calcX, calcY);
+        }
     }
     
     /**
