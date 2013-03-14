@@ -20,6 +20,13 @@ public class ComplexTest extends TestCase {
         assertEquals("18.354-0.77i", c.add(d).toString());
     }
     
+    public void testComplement() {
+        Complex c = new Complex(3, 2);
+        assertEquals("3.0-2.0i", c.complement().toString());
+        Complex d = new Complex(15.354, -2.77);
+        assertEquals("15.354+2.77i", d.complement().toString());
+    }
+    
     public void testModulus() {
         Complex c = new Complex(188.46662, 15.77764);
         assertEquals("189.12588606056548", "" + c.modulus());

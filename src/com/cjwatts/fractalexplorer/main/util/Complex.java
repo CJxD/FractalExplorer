@@ -22,17 +22,24 @@ public final class Complex {
     }
     
     /**
+     * @return The complex conjugate
+     */
+    public Complex complement() {
+        return new Complex(re, -im);
+    }
+    
+    /**
      * @return Modulus of the complex number
      */
     public double modulus() {
-        return Math.sqrt(Math.pow(re, 2) + Math.pow(im, 2));
+        return Math.sqrt(re * re + im * im);
     }
     
     /**
      * @return Squared modulus of the complex number
      */
     public double modulusSquared() {
-        return Math.pow(re, 2) + Math.pow(im, 2);
+        return re * re + im * im;
     }
     
     /**
@@ -50,7 +57,9 @@ public final class Complex {
      * @return Square of the complex number
      */
     public Complex square() {
-        double rNew = Math.pow(re, 2) - Math.pow(im, 2);
+    	// Real = a^2 - b^2
+    	// Im = 2ab
+        double rNew = re * re - im * im;
         double iNew = 2 * (re * im);
         return new Complex(rNew, iNew);
     }
