@@ -1,34 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project name="Fractal Explorer" default="build">
-	<!-- Global properties -->
-	<property name="src" location="src" />
-	<property name="bin" location="bin" />
-	
-	<target name="init" depends="clean" description="Refresh the bin directory">
-		<mkdir dir="${bin}" />
-	</target>
-	
-	<target name="build" depends="init" description="Compile the source">
-		<javac srcdir="${src}" destdir="${bin}" includeantruntime="false">
-			<exclude name="**/fractalexplorer/test/*.java" />
-		</javac>
-		<antcall target="dist" />
-	</target>
-	
-	<target name="buildtest" depends="init" description="Compile the source for testing">
-		<javac srcdir="${src}" destdir="${bin}" includeantruntime="false"></javac>
-	</target>
-	
-    <target name="dist" description="Create the jar">
-        <jar jarfile="${bin}/Fractal Explorer.jar" basedir="${bin}" filesetmanifest="mergewithoutmain">
+<project default="create_run_jar" name="Create Runnable Jar for Project FractalExplorer">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/bin/Fractal Explorer.jar" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="com.cjwatts.fractalexplorer.main.FractalExplorer"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
+            <fileset dir="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Program Files/Eclipse/plugins/org.junit_3.8.2.v3_8_2_v20100427-1100/junit.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/reflections-0.9.8.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/guava-11.0.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/javassist-3.12.1.GA.jar"/>
         </jar>
     </target>
-	
-	<target name="clean" description="Clean up">
-		<delete dir="${bin}" />
-	</target>
 </project>

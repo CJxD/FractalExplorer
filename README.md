@@ -1,0 +1,34 @@
+# Fractal Explorer
+Authored by Chris Watts
+
+## Building
+Both ANT build files and batch files are provided to successfully build the project.
+The ANT build.xml can build a JAR as well as compile the source, but build.bat just compiles and runs.
+
+All required libraries for this project are located under `lib`
+
+## Usage
+Upon running `main` found in `com.cjwatts.fractalexplorer.main.FractalExplorer`, you should see the main dialog with two fractal panels.
+The larger one displays the fractal algorithm as specified by the fractal controls; the smaller displays the Julia set of the current algorithm.
+
+By clicking on an area of the main fractal, you can select a point to 'explore'. The selected point is passed as the seed for the Julia algorithm, which will then update.
+
+## Specification
+Original spec is (was) found here: https://secure.ecs.soton.ac.uk/notes/comp1206/assn1-2013.html
+
+### Extensions
+The following extensions have been made past the specification:
+
+  * Favourites are stored in favourites.xml
+  * Image rendering is multithreaded, and if available, CUDA is used to help compute the points.
+  * Images are buffered for fast response times when the fractals are not modified.
+  * Many fractal algorithms are provided, and writing your own is easily done through extending the FractalAlgorithm class.
+  * The coordinate control spinners are logarithmic for pleasant scrolling.
+  * Colours are smoothed.
+  * Colour schemes are implemented, and can be easily modified in the program, or in favourites.xml
+  * A full screen option is available.
+  * The views can be swapped in order to zoom and explore the Julia set.
+  
+### Known caveats
+
+  * There is currently no GUI support for editing a colour scheme - you can only select pre-existing ones.  
