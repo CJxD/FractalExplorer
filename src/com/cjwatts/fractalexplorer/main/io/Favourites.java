@@ -1,8 +1,6 @@
 package com.cjwatts.fractalexplorer.main.io;
 
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +8,25 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
-import org.yaml.snakeyaml.Yaml;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.cjwatts.fractalexplorer.main.FractalColourScheme;
+import com.cjwatts.fractalexplorer.main.algorithms.BaseFractalAlgorithm;
+import com.cjwatts.fractalexplorer.main.algorithms.MandelbrotAlgorithm;
+import com.cjwatts.fractalexplorer.main.util.Complex;
 
 /**
  * A sorted list of favourite fractals
@@ -20,21 +35,171 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class Favourites implements List<Favourite> {
 
-	private String filename = "favourites.yml";
-	private Yaml yaml = new Yaml();
+	private String filename = "favourites.xml";
 	private List<Favourite> list = new ArrayList<Favourite>();
+	
+	/*
+	 * Warning: There is a LOT of nesting going on with the XML stuff
+	 * Be prepared for dragons!
+	 * At least it's stable - stupid SnakeYAML
+	 */
 	
 	/**
 	 * Load the favourites file into memory
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
 	public void load() throws IOException {
-		FileInputStream in = new FileInputStream(filename);
-		list = (List<Favourite>) yaml.load(in);
-		
-		// Sort the list by name
-		Collections.sort(list);
+	    try {
+            // Get XML document
+            // (thanks to http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.parse(filename);
+            
+            // Where to store loaded favourites before adding to list
+            List<Favourite> loaded = new ArrayList<Favourite>();
+            
+            // Required node level objects
+            Node n1, n2, n3, n4, n5;
+            // Required node list level objects
+            NodeList l0, l1, l2, l3, l4;
+            
+            // <favourites>
+            l0 = doc.getElementsByTagName("favourite");
+            
+            // Attributes to attain
+            String name = null;
+            BaseFractalAlgorithm algorithm = null;
+            Complex selected = null;
+            FractalColourScheme scheme = null;
+            
+            for (int i = 0; i < l0.getLength(); i++) {
+                // <favourite>
+                n1 = l0.item(i);
+                name = n1.getAttributes().getNamedItem("name").getTextContent();
+                l1 = n1.getChildNodes();
+                for (int j = 0; j < l1.getLength(); j++) {
+                    n2 = l1.item(j);
+                    // <algorithm>
+                    if (n2.getNodeName().equals("algorithm")) {
+                        l2 = n2.getChildNodes();
+                        
+                        // Attibutes to attain
+                        String aName = null;
+                        Integer aIterations = null;
+                        Double aEscapeRadius = null;
+                        
+                        aName = n2.getAttributes().getNamedItem("name").getTextContent();
+                        for (int k = 0; k < l2.getLength(); k++) {
+                            n3 = l2.item(k);
+                            // <iterations>
+                            if (n3.getNodeName().equals("iterations")) {
+                                aIterations = Integer.parseInt(n3.getTextContent());
+                            }
+                            // <escaperadius>
+                            else if (n3.getNodeName().equals("escaperadius")) {
+                                aEscapeRadius = Double.parseDouble(n3.getTextContent());
+                            }
+                        }
+                        algorithm = BaseFractalAlgorithm.getByName(aName);
+                        // Panic default
+                        if (algorithm == null) algorithm = new MandelbrotAlgorithm();
+                        algorithm.setIterations(aIterations);
+                        algorithm.setEscapeRadius(aEscapeRadius);
+                    }
+                    // </algorithm>
+                    // <selected>
+                    if (n2.getNodeName().equals("selected")) {
+                        l2 = n2.getChildNodes();
+                        
+                        // Attibutes to attain
+                        Double sReal = null, sImaginary = null;
+                        
+                        for (int k = 0; k < l2.getLength(); k++) {
+                            n3 = l2.item(k);
+                            // <real>
+                            if (n3.getNodeName().equals("real")) {
+                                sReal = Double.parseDouble(n3.getTextContent());
+                            }
+                            // <imaginary>
+                            else if (n3.getNodeName().equals("imaginary")) {
+                                sImaginary = Double.parseDouble(n3.getTextContent());
+                            }
+                        }
+                        selected = new Complex(sReal, sImaginary);
+                    }
+                    // </selected>
+                    // <scheme>
+                    if (n2.getNodeName().equals("scheme")) {
+                        l2 = n2.getChildNodes();
+                        
+                        // Attributes should be fed directly into the colour scheme
+                        scheme = new FractalColourScheme();
+                        
+                        for (int k = 0; k < l2.getLength(); k++) {
+                            n3 = l2.item(k);
+                            // <gridlines>
+                            if (n3.getNodeName().equals("gridlines")) {
+                                scheme.setGridlineColour(deserialiseColour(n3.getTextContent()));
+                            }
+                            // <colours>
+                            else if (n3.getNodeName().equals("colours")) {
+                                l3 = n3.getChildNodes();
+                                for (int l = 0; l < l3.getLength(); l++) {
+                                    // <colourstop>
+                                    n4 = l3.item(l);
+                                    l4 = n4.getChildNodes();
+                                    
+                                    // Attibutes to attain
+                                    Double csProgress = 0.0;
+                                    Color csColour = Color.BLACK;
+                                    
+                                    for (int m = 0; m < l4.getLength(); m++) {
+                                        n5 = l4.item(m);
+                                        // <progress>
+                                        if (n5.getNodeName().equals("progress")) {
+                                            csProgress = Double.parseDouble(n5.getTextContent());
+                                        }
+                                        // <colour>
+                                        else if (n5.getNodeName().equals("colour")) {
+                                            csColour = deserialiseColour(n5.getTextContent());
+                                        }
+                                    }
+                                    scheme.addColourStop(csProgress, csColour);
+                                    // </colourstop>
+                                }
+                            }
+                            // </colours>
+                        }
+                    }
+                    // </scheme>
+                }
+                // Commit the data
+                loaded.add(new Favourite(
+                        name,
+                        algorithm,
+                        selected,
+                        scheme));
+            }
+            // Request a cleanup of all those objects now
+            System.gc();
+            
+            // Sort the favourites by name
+            Collections.sort(loaded);
+            
+            // Add favourites to list - list will be re-saved
+            list.addAll(loaded);
+            
+            // Sort once more in case the list already had items in it
+            Collections.sort(list);
+            
+        } catch (Exception ex) {
+            // Re-throw XML generation exceptions as IOExceptions
+            if (ex instanceof IOException)
+                throw (IOException) ex;
+            else
+                throw new IOException(ex);
+        }
 	}
 	
 	/**
@@ -42,11 +207,139 @@ public class Favourites implements List<Favourite> {
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
-		FileWriter fstream = new FileWriter(filename);
-		BufferedWriter writer = new BufferedWriter(fstream);
-		writer.write(yaml.dump(list));
-		writer.close();
+	    try {
+	        // Generate XML builder
+	        // (thanks to http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
+	        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+    		Document doc = docBuilder.newDocument();
+    		
+    		// Required element level objects
+            Element e0, e1, e2, e3, e4, e5;
+    		
+    		// <favourites>
+            e0 = doc.createElement("favourites");
+            for (Favourite f : list) {
+                // <favourite name="">
+                e1 = doc.createElement("favourite");
+                e1.setAttribute("name", f.getName());
+                //   <algorithm name="">
+                e2 = doc.createElement("algorithm");
+                e2.setAttribute("name", f.getAlgorithm().getName());
+                //     <iterations>
+                e3 = doc.createElement("iterations");
+                e3.appendChild(doc.createTextNode(f.getAlgorithm().getIterations() + ""));
+                e2.appendChild(e3);
+                //     <escaperadius>
+                e3 = doc.createElement("escaperadius");
+                e3.appendChild(doc.createTextNode(f.getAlgorithm().getEscapeRadius() + ""));
+                e2.appendChild(e3);
+                //   </algorithm>
+                e1.appendChild(e2);
+                //   <selected>
+                e2 = doc.createElement("selected");
+                //     <real>
+                e3 = doc.createElement("real");
+                e3.appendChild(doc.createTextNode(f.getSelected().real() + ""));
+                e2.appendChild(e3);
+                //     <imaginary>
+                e3 = doc.createElement("imaginary");
+                e3.appendChild(doc.createTextNode(f.getSelected().imaginary() + ""));
+                e2.appendChild(e3);
+                //   </selected>
+                e1.appendChild(e2);
+                //   <scheme>
+                e2 = doc.createElement("scheme");
+                //     <gridlines>
+                e3 = doc.createElement("gridlines");
+                e3.appendChild(doc.createTextNode(
+                        serialiseColour(f.getScheme().getGridlineColour())));
+                e2.appendChild(e3);
+                //     <colours>
+                e3 = doc.createElement("colours");
+                for (Map.Entry<Double, Color> entry : f.getScheme().entrySet()) {
+                    //   <colourstop>
+                    e4 = doc.createElement("colourstop");
+                    //     <progress>
+                    e5 = doc.createElement("progress");
+                    e5.appendChild(doc.createTextNode(entry.getKey() + ""));
+                    e4.appendChild(e5);
+                    //     <colour>
+                    e5 = doc.createElement("colour");
+                    e5.appendChild(doc.createTextNode(
+                            serialiseColour(entry.getValue())));
+                    e4.appendChild(e5);
+                    //   </colourstop>
+                    e3.appendChild(e4);
+                }
+                //     </colours>
+                e2.appendChild(e3);
+                //   </scheme>
+                e1.appendChild(e2);
+                // </favourite>
+                e0.appendChild(e1);
+            }
+            // </favourites>
+            doc.appendChild(e0);
+            
+            // Request a cleanup of all those objects now
+            System.gc();
+            
+            // Prepare Optimus Prime
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            
+            // Write output
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(filename);
+            transformer.transform(source, result);
+            
+	    } catch (Exception ex) {
+	        // Re-throw XML generation exceptions as IOExceptions
+	        if (ex instanceof IOException)
+                throw (IOException) ex;
+            else
+                throw new IOException(ex);
+        }
 	}
+
+	/**
+	 * @return String representation of colour for nice XML
+	 */
+	private String serialiseColour(Color c) {
+	    return c.getRed()+" "+c.getGreen()+" "+c.getBlue();
+	}
+	
+	/**
+	 * @param c Serialised colour string
+	 * @return Colour from string
+	 * @throws NumberFormatException if colour not valid
+	 */
+	private Color deserialiseColour(String c) throws NumberFormatException {
+	    String[] parts = c.split(" ");
+	    int r, g, b, a;
+	    Color result;
+	    if (parts.length >= 3) {
+	        r = Integer.parseInt(parts[0]);
+	        g = Integer.parseInt(parts[1]);
+	        b = Integer.parseInt(parts[2]);
+	        result = new Color(r, g, b);
+	    } else {
+	        throw new NumberFormatException(c + " is not a valid colour!");
+	    }
+	    // Bonus: Secret alpha channel support
+	    if (parts.length == 4) {
+	        a = Integer.parseInt(parts[3]);
+	        result = new Color(r, g, b, a);
+	    }
+	    return result;
+	}
+	
 	
 	@Override
 	public boolean add(Favourite arg0) {
@@ -144,12 +437,13 @@ public class Favourites implements List<Favourite> {
 	 * @param upper Upper bound of search
 	 */
 	private Favourite getByName(String name, int lower, int upper) {
+	    if (upper - lower <= 0) return null;
 		// Compare the middle element to the search name
 		int mid = lower + upper / 2;
 		int compare = list.get(mid).getName().compareTo(name);
 
 		if (compare < 0)
-			return getByName(name, lower, mid - 1);
+			return getByName(name, lower, mid);
 		else if (compare > 0)
 			return getByName(name, mid + 1, upper);
 		else

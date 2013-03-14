@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<favourites>
+    <favourite name="Snake">
+        <algorithm name="Tricorn">
+            <iterations>100</iterations>
+            <escaperadius>2.0</escaperadius>
+        </algorithm>
+        <selected>
+            <real>0.21202263276064612</real>
+            <imaginary>-0.521893558390474</imaginary>
+        </selected>
+        <scheme>
+            <gridlines>255 255 255</gridlines>
+            <colours>
+                <colourstop>
+                    <progress>0.0</progress>
+                    <colour>0 0 40</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.05</progress>
+                    <colour>20 70 165</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.1</progress>
+                    <colour>255 255 255</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.15</progress>
+                    <colour>210 130 0</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.25</progress>
+                    <colour>0 0 40</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.4</progress>
+                    <colour>20 70 165</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.6</progress>
+                    <colour>255 255 255</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.8</progress>
+                    <colour>210 130 0</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>1.0</progress>
+                    <colour>0 0 0</colour>
+                </colourstop>
+            </colours>
+        </scheme>
+    </favourite>
+    <favourite name="The Ship">
+        <algorithm name="Mandelbrot">
+            <iterations>100</iterations>
+            <escaperadius>2.0</escaperadius>
+        </algorithm>
+        <selected>
+            <real>0.0</real>
+            <imaginary>0.0</imaginary>
+        </selected>
+        <scheme>
+            <gridlines>255 255 255</gridlines>
+            <colours>
+                <colourstop>
+                    <progress>0.0</progress>
+                    <colour>0 0 0</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.2</progress>
+                    <colour>255 84 16</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.3</progress>
+                    <colour>255 195 16</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>0.4</progress>
+                    <colour>255 255 255</colour>
+                </colourstop>
+                <colourstop>
+                    <progress>1.0</progress>
+                    <colour>0 0 0</colour>
+                </colourstop>
+            </colours>
+        </scheme>
+    </favourite>
+</favourites>

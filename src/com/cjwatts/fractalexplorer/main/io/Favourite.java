@@ -1,13 +1,13 @@
 package com.cjwatts.fractalexplorer.main.io;
 
 import com.cjwatts.fractalexplorer.main.FractalColourScheme;
-import com.cjwatts.fractalexplorer.main.algorithms.FractalAlgorithm;
+import com.cjwatts.fractalexplorer.main.algorithms.BaseFractalAlgorithm;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class Favourite implements Comparable<Favourite> {
 
 	private String name;
-	private FractalAlgorithm algorithm;
+	private BaseFractalAlgorithm algorithm;
 	private Complex selected;
 	private FractalColourScheme scheme;
 	
@@ -21,7 +21,7 @@ public class Favourite implements Comparable<Favourite> {
 	 */
 	public Favourite(
 			String name,
-			FractalAlgorithm algorithm,
+			BaseFractalAlgorithm algorithm,
 			Complex selected,
 			FractalColourScheme scheme) {
 		this.name = name;
@@ -43,11 +43,11 @@ public class Favourite implements Comparable<Favourite> {
 		this.name = name;
 	}
 
-	public FractalAlgorithm getAlgorithm() {
+	public BaseFractalAlgorithm getAlgorithm() {
 		return algorithm;
 	}
 
-	public void setAlgorithm(FractalAlgorithm algorithm) {
+	public void setAlgorithm(BaseFractalAlgorithm algorithm) {
 		this.algorithm = algorithm;
 	}
 
