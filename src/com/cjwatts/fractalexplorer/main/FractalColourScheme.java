@@ -59,7 +59,6 @@ public class FractalColourScheme {
         SEA_OF_GOLD.addColourStop(0.15, gold);
         SEA_OF_GOLD.addColourStop(0.1, Color.WHITE);
         SEA_OF_GOLD.addColourStop(0.05, lightblue);
-        SEA_OF_GOLD.addColourStop(0.01, darkblue);
     }
     static {
         DEFAULT = SEA_OF_GOLD;

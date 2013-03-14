@@ -8,9 +8,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import com.cjwatts.fractalexplorer.main.FractalColourScheme;
-import com.cjwatts.fractalexplorer.main.FractalPanel;
-import com.cjwatts.fractalexplorer.main.algorithms.FractalAlgorithm;
+import com.cjwatts.fractalexplorer.main.algorithms.BaseFractalAlgorithm;
 import com.cjwatts.fractalexplorer.main.algorithms.MandelbrotAlgorithm;
+import com.cjwatts.fractalexplorer.main.panels.FractalPanel;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 /**
@@ -33,7 +33,7 @@ public class TimeBenchmark {
 		
 		// Set up fractal
 		FractalColourScheme scheme = FractalColourScheme.DEFAULT;
-		FractalAlgorithm algorithm = new MandelbrotAlgorithm(100, 2);
+		BaseFractalAlgorithm algorithm = new MandelbrotAlgorithm(100, 2);
 		FractalPanel fractal = new FractalPanel(algorithm);
 		fractal.setColourScheme(scheme);
 		fractal.setSize(width, height);
@@ -46,7 +46,7 @@ public class TimeBenchmark {
 		
 		// Get classes
 		Class<Complex> cClass = Complex.class;
-		Class<FractalAlgorithm> faClass = FractalAlgorithm.class;
+		Class<BaseFractalAlgorithm> faClass = BaseFractalAlgorithm.class;
 		Class<FractalPanel> fpClass = FractalPanel.class;
 		Class<FractalPanel.Renderer> fprClass = FractalPanel.Renderer.class;
 		Class<FractalColourScheme> fcsClass = FractalColourScheme.class;
