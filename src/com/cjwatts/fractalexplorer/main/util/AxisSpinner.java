@@ -22,11 +22,9 @@ public class AxisSpinner extends JSpinner {
         this.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                Double value = getDouble();
-                // Steps are sensitive to the current magnitude of the value
-                long magnitude = Math.round(Math.log10(value));
-                double stepSize = STEP_RATIO * Math.pow(10, magnitude);
-                model.setStepSize(stepSize);
+                Double value = Math.abs(getDouble());
+                // Steps are sensitive to the current value
+                model.setStepSize(STEP_RATIO * value);
             }
         });
     }

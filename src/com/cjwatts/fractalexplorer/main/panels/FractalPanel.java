@@ -1,4 +1,4 @@
-package com.cjwatts.fractalexplorer.main;
+package com.cjwatts.fractalexplorer.main.panels;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,6 +10,8 @@ import java.awt.image.WritableRaster;
 
 import javax.swing.JPanel;
 
+import com.cjwatts.fractalexplorer.main.FractalColourScheme;
+import com.cjwatts.fractalexplorer.main.FractalExplorer;
 import com.cjwatts.fractalexplorer.main.algorithms.FractalAlgorithm;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
@@ -37,7 +39,6 @@ public class FractalPanel extends JPanel {
     private final RenderCache cache = new RenderCache();
     
     public FractalPanel(FractalAlgorithm algorithm) {
-        this.setBackground(Color.BLACK);
         this.setAlgorithm(algorithm);
     }
     
@@ -74,6 +75,7 @@ public class FractalPanel extends JPanel {
             g2.drawLine(0, crosshairs.y, this.getWidth(), crosshairs.y);
             
             // Crosshair coordinate text
+            g2.setFont(FractalExplorer.TEXT_FONT);
             g2.drawString(
                     getCartesian(crosshairs.x, crosshairs.y).round(3).toString(),
                     crosshairs.x + 15,
@@ -272,7 +274,7 @@ public class FractalPanel extends JPanel {
         // Get complex Cartesian coordinates
         Complex coords = getCartesian(x, y);
         
-        return scheme.calculateColour(algorithm.divergenceRatio(coords));
+        return scheme.calculateColour(algorithm.escapeTime(coords));
     }
     
     /**
@@ -290,22 +292,6 @@ public class FractalPanel extends JPanel {
      */
     public void paintZoom(Rectangle r) {
         this.zoom = r;
-        this.repaint();
-    }
-    
-    /**
-     * Get the algorithm for the fractal equations
-     */
-    public FractalAlgorithm getAlgorithm() {
-        return this.algorithm;
-    }
-    
-    /**
-     * Set the algorithm for the fractal equations
-     * @param algorithm
-     */
-    public void setAlgorithm(FractalAlgorithm algorithm) {
-        this.algorithm = algorithm;
         this.repaint();
     }
     
@@ -348,6 +334,22 @@ public class FractalPanel extends JPanel {
      */
     public void setColourScheme(FractalColourScheme scheme) {
         this.scheme = scheme;
+        this.repaint();
+    }
+    
+    /**
+     * Get the algorithm for the fractal equations
+     */
+    public FractalAlgorithm getAlgorithm() {
+        return this.algorithm;
+    }
+    
+    /**
+     * Set the algorithm for the fractal equations
+     * @param algorithm
+     */
+    public void setAlgorithm(FractalAlgorithm algorithm) {
+        this.algorithm = algorithm;
         this.repaint();
     }
     
