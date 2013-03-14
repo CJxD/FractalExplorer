@@ -3,33 +3,51 @@ package com.cjwatts.fractalexplorer.main.algorithms;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class JuliaAlgorithm extends FractalAlgorithm {
-    
-    private static final String name = "Julia";
+	
+    protected BaseFractalAlgorithm base;
     protected Complex seed;
     
-    public JuliaAlgorithm(Complex seed, int iterations, double escapeRadius) {
-        super(iterations, escapeRadius);
-        this.seed = seed;
+    /**
+     * Create a new Julia computation based on another fractal algorithm
+     * @param base
+     */
+    public JuliaAlgorithm(BaseFractalAlgorithm base, Complex seed) {
+    	super();
+    	this.base = base;
+    	this.seed = seed;
     }
     
     @Override
-    public double divergenceRatio(Complex point) {
-        Complex current = point;
-        
-        // Keep iterating until either n is reached or divergence is found
-        int i = 0;
-        while (current.modulusSquared() < escapeSquared && i < iterations) {
-            // Z(i+1) = (Z(i) * Z(i)) + c
-            current = current.square().add(seed);
-            i++;
-        }
-        
-        return normalise(current, i);
+    public double escapeTime(Complex point) {
+        return base.escapeTime(point, seed);
     }
-    
-    @Override
-    public String getName() {
-        return name;
-    }
+
+    /**
+     * @return Seed of the Julia set
+     */
+    public Complex getSeed() {
+		return seed;
+	}
+
+    /**
+     * @param seed Seed of the Julia set
+     */
+	public void setSeed(Complex seed) {
+		this.seed = seed;
+	}
+
+	/**
+     * @return Base algorithm for this Julia set
+     */
+	public BaseFractalAlgorithm getBase() {
+		return base;
+	}
+
+	/**
+	 * @param base Algorithm to set as the base for this Julia set
+	 */
+	public void setBase(BaseFractalAlgorithm base) {
+		this.base = base;
+	}
     
 }

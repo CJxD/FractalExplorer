@@ -2,15 +2,15 @@ package com.cjwatts.fractalexplorer.main.algorithms;
 
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
-public class BurningShipAlgorithm extends BaseFractalAlgorithm {
+public class TricornAlgorithm extends BaseFractalAlgorithm {
+
+	private static final String name = "Tricorn";
     
-    private static final String name = "Burning Ship";
-    
-    public BurningShipAlgorithm() {
+    public TricornAlgorithm() {
     	super();
     }
     
-    public BurningShipAlgorithm(int iterations, double escapeRadius) {
+    public TricornAlgorithm(int iterations, double escapeRadius) {
         super(iterations, escapeRadius);
     }
     
@@ -19,11 +19,8 @@ public class BurningShipAlgorithm extends BaseFractalAlgorithm {
         // Keep iterating until either n is reached or divergence is found
         int i = 0;
         while (point.modulusSquared() < escapeSquared && i < iterations) {
-            // Z(i+1) = (|ReZ(i)| * i|ImZ(i)|) + c
-            double newReal = Math.abs(point.real());
-            double newIm = Math.abs(point.imaginary());
-            Complex d = new Complex(newReal, newIm);
-            point = d.square().add(seed);
+            // Z(i+1) = complement(Z(i) * Z(i)) + c
+            point = point.complement().square().add(seed);
             i++;
         }
         
@@ -34,5 +31,5 @@ public class BurningShipAlgorithm extends BaseFractalAlgorithm {
     public String getName() {
         return name;
     }
-    
+
 }

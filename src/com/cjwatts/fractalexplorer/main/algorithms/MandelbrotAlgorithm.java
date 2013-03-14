@@ -2,27 +2,29 @@ package com.cjwatts.fractalexplorer.main.algorithms;
 
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
-public class MandelbrotAlgorithm extends FractalAlgorithm {
+public class MandelbrotAlgorithm extends BaseFractalAlgorithm {
     
     private static final String name = "Mandelbrot";
+    
+    public MandelbrotAlgorithm() {
+    	super();
+    }
     
     public MandelbrotAlgorithm(int iterations, double escapeRadius) {
         super(iterations, escapeRadius);
     }
     
     @Override
-    public double divergenceRatio(Complex seed) {
-        Complex current = seed;
-        
+    public double escapeTime(Complex point, Complex seed) {
         // Keep iterating until either n is reached or divergence is found
         int i = 0;
-        while (current.modulusSquared() < escapeSquared && i < iterations) {
+        while (point.modulusSquared() < escapeSquared && i < iterations) {
             // Z(i+1) = (Z(i) * Z(i)) + c
-            current = current.square().add(seed);
+            point = point.square().add(seed);
             i++;
         }
         
-        return normalise(current, i);
+        return normalise(point, i);
     }
     
     @Override
