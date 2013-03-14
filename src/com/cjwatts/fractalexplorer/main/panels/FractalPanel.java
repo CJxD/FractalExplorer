@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 import com.cjwatts.fractalexplorer.main.FractalColourScheme;
 import com.cjwatts.fractalexplorer.main.FractalExplorer;
@@ -37,6 +38,7 @@ public class FractalPanel extends JPanel {
     private FractalColourScheme scheme = FractalColourScheme.DEFAULT;
     
     private final RenderCache cache = new RenderCache();
+    private SwingWorker<Void, Void> worker;
     
     public FractalPanel(FractalAlgorithm algorithm) {
         this.setAlgorithm(algorithm);
@@ -45,22 +47,30 @@ public class FractalPanel extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        int width = this.getWidth();
-        int height = this.getHeight();
+        final int width = this.getWidth();
+        final int height = this.getHeight();
         
         // Check whether a re-render is required, or just another paint
         if (cache.isDirty()) {
-            Renderer renderer = new Renderer(0, 0, width, height);
-            try {
-                // Start primary thread
-                renderer.start();
-                // Wait to finish
-                renderer.join();
+            // If the previous worker isn't finished, cancel it
+            if (worker != null && !worker.isDone()) worker.cancel(true);
+            worker = new SwingWorker<Void, Void>() {
+                private Renderer renderer = new Renderer(0, 0, width, height);
                 
-                cache.setImage(renderer.getRender());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                @Override
+                protected Void doInBackground() throws Exception {
+                    // Run a new render instance in this thread
+                    renderer.run();
+                    return null;
+                }
+                
+                @Override
+                protected void done() {
+                    cache.setImage(renderer.getRender());
+                    repaint();
+                }
+            };
+            worker.execute();
         }
         
         // Draw the fractal
@@ -91,9 +101,10 @@ public class FractalPanel extends JPanel {
     /**
      * Data structure to hold cached renders
      */
-    protected class RenderCache {
+    public class RenderCache {
         int hashCode;
         BufferedImage image;
+        private boolean invalid = false;
         
         public RenderCache() {
             this.hashCode = calculateHash();
@@ -118,6 +129,13 @@ public class FractalPanel extends JPanel {
         }
         
         /**
+         * Mark the cache as dirty to force a re-render
+         */
+        public void invalidate() {
+            this.invalid = true;
+        }
+        
+        /**
          * Determine whether the cache entry needs updating
          * @return True if cache needs updating
          */
@@ -125,7 +143,7 @@ public class FractalPanel extends JPanel {
             int oldHash = hashCode;
             hashCode = calculateHash();
             
-            return oldHash != hashCode;
+            return invalid || oldHash != hashCode;
         }
         
         /**
@@ -142,6 +160,7 @@ public class FractalPanel extends JPanel {
          */
         public void setImage(BufferedImage image) {
             this.image = image;
+            this.invalid = false;
         }
         
     }
@@ -201,7 +220,7 @@ public class FractalPanel extends JPanel {
                     try {
                         r.join();
                     } catch (InterruptedException ex) {
-                        ex.printStackTrace();
+                        return;
                     }
                 }
                 
@@ -293,6 +312,13 @@ public class FractalPanel extends JPanel {
     public void paintZoom(Rectangle r) {
         this.zoom = r;
         this.repaint();
+    }
+    
+    /**
+     * @return The fractal image cache
+     */
+    public RenderCache getCache() {
+        return this.cache;
     }
     
     /**

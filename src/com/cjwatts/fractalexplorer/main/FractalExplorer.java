@@ -34,8 +34,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.cjwatts.fractalexplorer.main.algorithms.*;
 import com.cjwatts.fractalexplorer.main.io.Favourite;
 import com.cjwatts.fractalexplorer.main.io.Favourites;
@@ -442,8 +440,13 @@ public class FractalExplorer extends JFrame {
         swap.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException();
-                //repaint();
+                FractalPanel major = getMajorPanel();
+                FractalPanel minor = getMinorPanel();
+                setMajorPanel(minor);
+                setMinorPanel(major);
+                major.getCache().invalidate();
+                minor.getCache().invalidate();
+                repaint();
             }
         });
         
@@ -622,10 +625,40 @@ public class FractalExplorer extends JFrame {
         this.setContentPane(content);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBounds(100, 100, 640, 480);
-        this.setMinimumSize(new Dimension(455, 365));
+        this.setMinimumSize(new Dimension(439, 497));
         this.pack();
     }
     
+    /**
+     * @return The current fractal panel in the major fractal wrapper
+     */
+    public FractalPanel getMajorPanel() {
+        return (FractalPanel) majorWrapper.getComponent(0);
+    }
+
+    /**
+     * @param majorPanel The fractal panel to put in the major fractal wrapper
+     */
+    public void setMajorPanel(FractalPanel majorPanel) {
+        majorWrapper.removeAll();
+        majorWrapper.add(majorPanel);
+    }
+
+    /**
+     * @return The current fractal panel in the minor fractal wrapper
+     */
+    public FractalPanel getMinorPanel() {
+        return (FractalPanel) minorWrapper.getComponent(0);
+    }
+
+    /**
+     * @param minorPanel The fractal panel to put in the minor fractal wrapper
+     */
+    public void setMinorPanel(FractalPanel minorPanel) {
+        minorWrapper.removeAll();
+        minorWrapper.add(minorPanel);
+    }
+
     /**
      * Full screen class to show an expanded fractal
      */
