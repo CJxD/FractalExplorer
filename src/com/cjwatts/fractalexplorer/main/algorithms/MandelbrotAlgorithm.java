@@ -4,14 +4,14 @@ import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class MandelbrotAlgorithm extends BaseFractalAlgorithm {
     
-    private static final String name = "Mandelbrot";
-    
     public MandelbrotAlgorithm() {
         super();
+        name = "Mandelbrot";
     }
     
     public MandelbrotAlgorithm(int iterations, double escapeRadius) {
         super(iterations, escapeRadius);
+        name = "Mandelbrot";
     }
     
     @Override
@@ -25,11 +25,6 @@ public class MandelbrotAlgorithm extends BaseFractalAlgorithm {
         }
         
         return normalise(point, i);
-    }
-    
-    @Override
-    public String getName() {
-        return name;
     }
     
 }

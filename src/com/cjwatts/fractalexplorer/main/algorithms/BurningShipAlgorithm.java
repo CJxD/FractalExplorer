@@ -4,14 +4,14 @@ import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class BurningShipAlgorithm extends BaseFractalAlgorithm {
     
-    private static final String name = "Burning Ship";
-    
     public BurningShipAlgorithm() {
         super();
+        name = "Burning Ship";
     }
     
     public BurningShipAlgorithm(int iterations, double escapeRadius) {
         super(iterations, escapeRadius);
+        name = "Burning Ship";
     }
     
     @Override
@@ -28,11 +28,6 @@ public class BurningShipAlgorithm extends BaseFractalAlgorithm {
         }
         
         return normalise(point, i);
-    }
-    
-    @Override
-    public String getName() {
-        return name;
     }
     
 }

@@ -4,14 +4,14 @@ import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class TricornAlgorithm extends BaseFractalAlgorithm {
     
-    private static final String name = "Tricorn";
-    
     public TricornAlgorithm() {
         super();
+        name = "Tricorn";
     }
     
     public TricornAlgorithm(int iterations, double escapeRadius) {
         super(iterations, escapeRadius);
+        name = "Tricorn";
     }
     
     @Override
@@ -25,11 +25,6 @@ public class TricornAlgorithm extends BaseFractalAlgorithm {
         }
         
         return normalise(point, i);
-    }
-    
-    @Override
-    public String getName() {
-        return name;
     }
     
 }

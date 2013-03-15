@@ -2,8 +2,8 @@
 Authored by Chris Watts
 
 ## Building
-Both ANT build files and batch files are provided to successfully build the project.
-The ANT build.xml can build a JAR as well as compile the source, but build.bat just compiles and runs.
+Both ANT build files and shell files are provided to successfully build the project.
+The ANT build.xml can build a JAR as well as compile the source, but build.bat and build.sh just compile and run.
 
 All required libraries for this project are located under `lib`
 
@@ -28,9 +28,10 @@ The following extensions have been made past the specification:
   * Colours are smoothed.
   * Colour schemes are implemented, and can be easily modified in the program, or in favourites.xml
   * A full screen option is available.
-  * The views can be swapped in order to zoom and explore the Julia set.
   
 ### Known caveats
 
   * There is currently no GUI support for editing a colour scheme - you can only select pre-existing ones.
   * This was going to use OpenCL/CUDA, but because of the bulk of the native libraries required to ship with the program, it's so not worth it.
+  * Favourites do not currently store the previous viewport as it cannot yet modify the swing components controlling it.
+  * A viewport swapping feature exists, but due to last minute bugs, it was omitted.

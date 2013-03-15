@@ -12,6 +12,8 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     protected double escapeRadius = 2.0;
     protected double escapeSquared = 4.0;
     
+    protected String name;
+    
     private static final double LOG_2 = Math.log(2);
     
     public BaseFractalAlgorithm() {
@@ -44,7 +46,7 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
             // of it
             for (Class<? extends BaseFractalAlgorithm> a : algorithms) {
                 BaseFractalAlgorithm instance = a.newInstance();
-                if (instance.getName() == name) {
+                if (instance.getName().equals(name)) {
                     result = instance;
                 }
             }
@@ -91,7 +93,9 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     /**
      * @return Name of the algorithm
      */
-    public abstract String getName();
+    public String getName() {
+        return name;
+    }
     
     public int getIterations() {
         return this.iterations;
@@ -122,7 +126,10 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         long temp;
         temp = Double.doubleToLongBits(escapeRadius);
         result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(escapeSquared);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + iterations;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
     
@@ -142,7 +149,14 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         BaseFractalAlgorithm other = (BaseFractalAlgorithm) obj;
         if (Double.doubleToLongBits(escapeRadius) != Double.doubleToLongBits(other.escapeRadius))
             return false;
+        if (Double.doubleToLongBits(escapeSquared) != Double.doubleToLongBits(other.escapeSquared))
+            return false;
         if (iterations != other.iterations)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
             return false;
         return true;
     }

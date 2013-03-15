@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -197,8 +198,8 @@ public class FractalExplorer extends JFrame {
          * File("res/add.png"))); addFavourite = new JButton(add); } catch
          * (IOException ex) { // Fallback addFavourite = new JButton("+"); }
          */
-        // addFavourite.setBorder(BorderFactory.createEmptyBorder());
-        // addFavourite.setContentAreaFilled(false);
+        addFavourite.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        addFavourite.setContentAreaFilled(false);
         
         JButton removeFavourite = new JButton("-");
         /*
@@ -207,8 +208,8 @@ public class FractalExplorer extends JFrame {
          * catch (IOException ex) { // Fallback removeFavourite = new
          * JButton("-"); }
          */
-        // removeFavourite.setBorder(BorderFactory.createEmptyBorder());
-        // removeFavourite.setContentAreaFilled(false);
+        removeFavourite.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        removeFavourite.setContentAreaFilled(false);
         
         // Generate colour scheme editor
         JPanel colourSchemePanel = new JPanel();
@@ -308,12 +309,12 @@ public class FractalExplorer extends JFrame {
             viewButtonLayout.createParallelGroup(Alignment.TRAILING, false)
                 .addComponent(resetView, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addComponent(fullScreen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                .addComponent(swap, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                //.addComponent(swap, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
         viewButtonLayout.setVerticalGroup(
             viewButtonLayout.createSequentialGroup()
-                .addComponent(swap)
-                .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                //.addComponent(swap)
+                //.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(resetView)
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .addComponent(fullScreen)
@@ -411,6 +412,7 @@ public class FractalExplorer extends JFrame {
                 // Reset ALL graph attributes (except algorithm)
                 iterationCount = iterations.getInteger();
                 majorFractal.getAlgorithm().setIterations(iterationCount);
+                minorFractal.repaint();
                 majorFractal.setComplexBounds(realFrom.getDouble(), realTo.getDouble(), imaginaryFrom.getDouble(), imaginaryTo.getDouble());
             }
             
@@ -513,8 +515,9 @@ public class FractalExplorer extends JFrame {
                         lastSelected = f.getSelected();
                         
                         FractalColourScheme scheme = f.getScheme();
-                        majorFractal.setAlgorithm(f.getAlgorithm());
-                        minorFractal.setAlgorithm(new JuliaAlgorithm(f.getAlgorithm(), lastSelected));
+                        BaseFractalAlgorithm algorithm = f.getAlgorithm();
+                        majorFractal.setAlgorithm(algorithm);
+                        minorFractal.setAlgorithm(new JuliaAlgorithm(algorithm, lastSelected));
                         majorFractal.setColourScheme(scheme);
                         minorFractal.setColourScheme(scheme);
                     }

@@ -433,18 +433,18 @@ public class Favourites implements List<Favourite> {
      * @param upper Upper bound of search
      */
     private Favourite getByName(String name, int lower, int upper) {
-        if (upper - lower <= 0)
+        if (upper - lower < 0)
             return null;
         // Compare the middle element to the search name
-        int mid = lower + upper / 2;
-        int compare = list.get(mid).getName().compareTo(name);
+        int mid = (lower + upper) / 2;
+        int compare = name.compareTo(list.get(mid).getName());
         
         if (compare < 0)
-            return getByName(name, lower, mid);
+            return getByName(name, lower, mid - 1);
         else if (compare > 0)
             return getByName(name, mid + 1, upper);
         else
-            return list.get(compare);
+            return list.get(mid);
     }
     
     @Override
