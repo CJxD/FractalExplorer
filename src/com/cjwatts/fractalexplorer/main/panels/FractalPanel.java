@@ -85,10 +85,15 @@ public class FractalPanel extends JPanel {
                 
                 @Override
                 protected Integer doInBackground() throws Exception {
-                    // Run a new render and monitor progress
-                    new Thread(renderer).start();
-                    while (!renderer.isRendered()) {
-                        publish(renderer.getProgress());
+                    if (progressBar != null) {
+                        // Run a new render and monitor progress
+                        new Thread(renderer).start();
+                        while (!renderer.isRendered()) {
+                            publish(renderer.getProgress());
+                        }
+                    } else {
+                        // Otherwise, just run a render in this thread
+                        renderer.run();
                     }
                     return renderer.getProgress();
                 }
@@ -127,7 +132,10 @@ public class FractalPanel extends JPanel {
             
             // Crosshair coordinate text
             g2.setFont(FractalExplorer.TEXT_FONT);
-            g2.drawString(getCartesian(crosshairs.x, crosshairs.y).round(3).toString(), crosshairs.x + 15, crosshairs.y + 15);
+            g2.drawString(getCartesian(
+                    crosshairs.x, crosshairs.y).round(3).toString(),
+                    crosshairs.x + 15,
+                    crosshairs.y + 15);
         }
         
         // Draw zoom rectangle
@@ -249,15 +257,9 @@ public class FractalPanel extends JPanel {
             progress = 0;
             for (int i = 0; i < tilesX; i++) {
                 for (int j = 0; j < tilesY; j++) {
-                    pool.execute(new RenderThread(tiles[i][j], i * tileW, // This
-                                                                          // is
-                                                                          // the
-                                                                          // horizontal
-                                                                          // position
-                                                                          // of
-                                                                          // the
-                                                                          // tile
-                    j * tileH)); // and this is the vertical position
+                    pool.execute(new RenderThread(tiles[i][j],
+                            i * tileW,      // This is the horizontal position of the tile
+                            j * tileH));    // and this is the vertical position
                 }
             }
             pool.shutdown();
@@ -291,9 +293,13 @@ public class FractalPanel extends JPanel {
                     for (int y = imin; y < imax; y++) {
                         // Draw the pixel with calculated colour
                         rgb = getPixelColour(x, y).getRGB();
-                        tile.setPixel(x - rmin, y - imin, new int[] {
-                                // Bit-shifting and modulus to extract r,g,b
-                        rgb >> 16, (rgb >> 8) % 256, rgb % 256 });
+                        tile.setPixel(x - rmin, y - imin,
+                                new int[] {
+                                    // Bit-shifting and modulus to extract r,g,b
+                                    rgb >> 16,
+                                    (rgb >> 8) % 256,
+                                    rgb % 256
+                                });
                     }
                 }
                 synchronized (progress) {
