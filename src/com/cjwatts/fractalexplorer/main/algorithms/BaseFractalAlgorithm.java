@@ -12,8 +12,6 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     protected double escapeRadius = 2.0;
     protected double escapeSquared = 4.0;
     
-    protected String name;
-    
     private static final double LOG_2 = Math.log(2);
     
     public BaseFractalAlgorithm() {
@@ -93,9 +91,7 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     /**
      * @return Name of the algorithm
      */
-    public String getName() {
-        return name;
-    }
+    public abstract String getName();
     
     public int getIterations() {
         return this.iterations;
@@ -129,7 +125,7 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         temp = Double.doubleToLongBits(escapeSquared);
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + iterations;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         return result;
     }
     
@@ -153,10 +149,10 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
             return false;
         if (iterations != other.iterations)
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         return true;
     }
