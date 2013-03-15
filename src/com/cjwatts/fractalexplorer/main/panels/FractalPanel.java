@@ -85,16 +85,16 @@ public class FractalPanel extends JPanel {
                 
                 @Override
                 protected Integer doInBackground() throws Exception {
-                    if (progressBar != null) {
-                        // Run a new render and monitor progress
-                        new Thread(renderer).start();
-                        while (!renderer.isRendered()) {
-                            publish(renderer.getProgress());
-                        }
-                    } else {
-                        // Otherwise, just run a render in this thread
-                        renderer.run();
+                    // Run a new render and monitor progress
+                    Thread main = new Thread(renderer);
+                    main.start();
+                    
+                    while (main.isAlive() && !isCancelled()) {
+                        publish(renderer.getProgress());
                     }
+                    // If break from cancelled, interrupt the main thread
+                    if (main.isAlive()) main.interrupt();
+                    
                     return renderer.getProgress();
                 }
                 
@@ -112,7 +112,9 @@ public class FractalPanel extends JPanel {
                         progressBar.setValue(0);
                     }
                     // Set the render image
-                    cache.setImage(renderer.getRender());
+                    if (renderer.isRendered()) {
+                        cache.setImage(renderer.getRender());
+                    }
                     repaint();
                 }
             };
