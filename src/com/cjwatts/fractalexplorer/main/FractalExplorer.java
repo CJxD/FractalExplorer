@@ -47,7 +47,7 @@ import com.cjwatts.fractalexplorer.main.util.IterationSpinner;
 public class FractalExplorer extends JFrame {
     
     private static final long serialVersionUID = 1L;
-
+    
     public static final Font TEXT_FONT = new Font("Arial", 0, 11);
     
     protected BaseFractalPanel majorFractal;
@@ -80,6 +80,7 @@ public class FractalExplorer extends JFrame {
         }
         
         SwingUtilities.invokeLater(new Runnable() {
+            
             @Override
             public void run() {
                 FractalExplorer explorer = new FractalExplorer("Fractal Explorer");
@@ -105,7 +106,7 @@ public class FractalExplorer extends JFrame {
         minorFractal = new JuliaPanel(new JuliaAlgorithm(majorFractal.getAlgorithm(), lastSelected));
         minorFractal.setColourScheme(FractalColourScheme.DEFAULT);
         
-     	// Put the fractals in wrappers for simple rearrangement
+        // Put the fractals in wrappers for simple rearrangement
         majorWrapper = new JPanel();
         majorWrapper.setLayout(new BorderLayout());
         majorWrapper.add(majorFractal);
@@ -191,28 +192,23 @@ public class FractalExplorer extends JFrame {
         
         // Generate add and remove buttons
         JButton addFavourite = new JButton("+");
-        /*try {
-            ImageIcon add = new ImageIcon(
-                    ImageIO.read(new File("res/add.png")));
-            addFavourite = new JButton(add);
-        } catch (IOException ex) {
-            // Fallback
-            addFavourite = new JButton("+");
-        }*/
-        //addFavourite.setBorder(BorderFactory.createEmptyBorder());
-        //addFavourite.setContentAreaFilled(false);
-         
+        /*
+         * try { ImageIcon add = new ImageIcon( ImageIO.read(new
+         * File("res/add.png"))); addFavourite = new JButton(add); } catch
+         * (IOException ex) { // Fallback addFavourite = new JButton("+"); }
+         */
+        // addFavourite.setBorder(BorderFactory.createEmptyBorder());
+        // addFavourite.setContentAreaFilled(false);
+        
         JButton removeFavourite = new JButton("-");
-        /*try {
-            ImageIcon remove = new ImageIcon(
-                    ImageIO.read(new File("res/remove.png")));
-            removeFavourite = new JButton(remove);
-        } catch (IOException ex) {
-            // Fallback
-            removeFavourite = new JButton("-");
-        }*/
-        //removeFavourite.setBorder(BorderFactory.createEmptyBorder());
-        //removeFavourite.setContentAreaFilled(false);
+        /*
+         * try { ImageIcon remove = new ImageIcon( ImageIO.read(new
+         * File("res/remove.png"))); removeFavourite = new JButton(remove); }
+         * catch (IOException ex) { // Fallback removeFavourite = new
+         * JButton("-"); }
+         */
+        // removeFavourite.setBorder(BorderFactory.createEmptyBorder());
+        // removeFavourite.setContentAreaFilled(false);
         
         // Generate colour scheme editor
         JPanel colourSchemePanel = new JPanel();
@@ -409,6 +405,7 @@ public class FractalExplorer extends JFrame {
         
         // Change listener for graph controls
         class FractalUpdater implements ChangeListener, ItemListener {
+            
             @Override
             public void stateChanged(ChangeEvent e) {
                 // Reset ALL graph attributes (except algorithm)
@@ -438,6 +435,7 @@ public class FractalExplorer extends JFrame {
         
         // View swap
         swap.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 FractalPanel major = getMajorPanel();
@@ -452,6 +450,7 @@ public class FractalExplorer extends JFrame {
         
         // View reset
         resetView.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 realFrom.setValue(FractalPanel.DEFAULT_REAL_MIN);
@@ -464,6 +463,7 @@ public class FractalExplorer extends JFrame {
         // View full screen
         final FullScreen fs = new FullScreen();
         fullScreen.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 fs.enterFullScreen();
@@ -472,6 +472,7 @@ public class FractalExplorer extends JFrame {
         
         // Favourites handler
         addFavourite.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 Object selected;
@@ -484,15 +485,13 @@ public class FractalExplorer extends JFrame {
                         // If the entry doesn't exist, add it to the combo box
                         favourites.addItem(selected.toString());
                     }
-                    favouriteList.add(new Favourite(
-                            selected.toString(),
-                            majorFractal.getAlgorithm(),
-                            lastSelected,
-                            majorFractal.getColourScheme()));;
+                    favouriteList.add(new Favourite(selected.toString(), majorFractal.getAlgorithm(), lastSelected, majorFractal.getColourScheme()));
+                    ;
                 }
             }
         });
         removeFavourite.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 Object selected;
@@ -503,6 +502,7 @@ public class FractalExplorer extends JFrame {
             }
         });
         favourites.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 Object selected;
@@ -510,7 +510,7 @@ public class FractalExplorer extends JFrame {
                     // Switch the display to the selected favourite data
                     Favourite f = favouriteList.getByName(selected.toString());
                     if (f != null) {
-                    	lastSelected = f.getSelected();
+                        lastSelected = f.getSelected();
                         
                         FractalColourScheme scheme = f.getScheme();
                         majorFractal.setAlgorithm(f.getAlgorithm());
@@ -524,6 +524,7 @@ public class FractalExplorer extends JFrame {
         
         // Colour scheme changer
         colourScheme.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 String scheme = (String) colourScheme.getSelectedItem();
@@ -561,7 +562,7 @@ public class FractalExplorer extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 // Spawn a new julia algorithm at the selected coordinates
-            	lastSelected = fractal.getCartesian(e.getX(), e.getY());
+                lastSelected = fractal.getCartesian(e.getX(), e.getY());
                 minorFractal.setAlgorithm(new JuliaAlgorithm(majorFractal.getAlgorithm(), lastSelected));
                 selectedCoords.setText(lastSelected.round(3).toString());
                 
@@ -605,7 +606,8 @@ public class FractalExplorer extends JFrame {
                         // Max x and max y
                         Complex point2 = fractal.getCartesian(zoomArea.x + zoomArea.width, zoomArea.y + zoomArea.height);
                         
-                        // Set the viewport via the AxisSpinners (to update both spinners and graph)
+                        // Set the viewport via the AxisSpinners (to update both
+                        // spinners and graph)
                         realFrom.setValue(point1.real());
                         realTo.setValue(point2.real());
                         imaginaryFrom.setValue(point1.imaginary());
@@ -635,7 +637,7 @@ public class FractalExplorer extends JFrame {
     public FractalPanel getMajorPanel() {
         return (FractalPanel) majorWrapper.getComponent(0);
     }
-
+    
     /**
      * @param majorPanel The fractal panel to put in the major fractal wrapper
      */
@@ -643,14 +645,14 @@ public class FractalExplorer extends JFrame {
         majorWrapper.removeAll();
         majorWrapper.add(majorPanel);
     }
-
+    
     /**
      * @return The current fractal panel in the minor fractal wrapper
      */
     public FractalPanel getMinorPanel() {
         return (FractalPanel) minorWrapper.getComponent(0);
     }
-
+    
     /**
      * @param minorPanel The fractal panel to put in the minor fractal wrapper
      */
@@ -658,7 +660,7 @@ public class FractalExplorer extends JFrame {
         minorWrapper.removeAll();
         minorWrapper.add(minorPanel);
     }
-
+    
     /**
      * Full screen class to show an expanded fractal
      */
@@ -701,7 +703,7 @@ public class FractalExplorer extends JFrame {
                 // Get the current device
                 GraphicsConfiguration config = FractalExplorer.this.getGraphicsConfiguration();
                 device = config.getDevice();
-
+                
                 // Remove the fractal from the explorer wrapper
                 majorWrapper.remove(majorFractal);
                 // Add the fractal to the full screen frame

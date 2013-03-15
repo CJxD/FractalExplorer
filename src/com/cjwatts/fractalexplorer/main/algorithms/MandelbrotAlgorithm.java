@@ -7,7 +7,7 @@ public class MandelbrotAlgorithm extends BaseFractalAlgorithm {
     private static final String name = "Mandelbrot";
     
     public MandelbrotAlgorithm() {
-    	super();
+        super();
     }
     
     public MandelbrotAlgorithm(int iterations, double escapeRadius) {

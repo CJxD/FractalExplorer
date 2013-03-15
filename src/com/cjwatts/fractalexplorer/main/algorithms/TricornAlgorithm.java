@@ -3,11 +3,11 @@ package com.cjwatts.fractalexplorer.main.algorithms;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public class TricornAlgorithm extends BaseFractalAlgorithm {
-
-	private static final String name = "Tricorn";
+    
+    private static final String name = "Tricorn";
     
     public TricornAlgorithm() {
-    	super();
+        super();
     }
     
     public TricornAlgorithm(int iterations, double escapeRadius) {
@@ -31,5 +31,5 @@ public class TricornAlgorithm extends BaseFractalAlgorithm {
     public String getName() {
         return name;
     }
-
+    
 }

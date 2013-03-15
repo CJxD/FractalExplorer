@@ -3,7 +3,8 @@ package com.cjwatts.fractalexplorer.main.algorithms;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public abstract class FractalAlgorithm {
-	/**
+    
+    /**
      * Calculates whether or not the complex number is in the fractal set using the escape time algorithm.
      * 
      * For complex numbers not inside the set, a ratio between

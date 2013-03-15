@@ -7,7 +7,7 @@ public class BurningShipAlgorithm extends BaseFractalAlgorithm {
     private static final String name = "Burning Ship";
     
     public BurningShipAlgorithm() {
-    	super();
+        super();
     }
     
     public BurningShipAlgorithm(int iterations, double escapeRadius) {

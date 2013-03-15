@@ -6,7 +6,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class IterationSpinner extends JSpinner {
-
+    
     private static final long serialVersionUID = 1L;
     private static final double STEP_RATIO = 0.1;
     
@@ -20,6 +20,7 @@ public class IterationSpinner extends JSpinner {
         
         // Step recalculation
         this.addChangeListener(new ChangeListener() {
+            
             @Override
             public void stateChanged(ChangeEvent e) {
                 Integer value = Math.abs(getInteger());

@@ -199,46 +199,45 @@ public class FractalColourScheme {
     public void setGridlineColour(Color c) {
         this.gridline = c;
     }
-
-	/* 
-	 * Generated hash code function
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((colours == null) ? 0 : colours.hashCode());
-		result = prime * result
-				+ ((gridline == null) ? 0 : gridline.hashCode());
-		return result;
-	}
-
-	/*
-	 * Generated equals function
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FractalColourScheme other = (FractalColourScheme) obj;
-		if (colours == null) {
-			if (other.colours != null)
-				return false;
-		} else if (!colours.equals(other.colours))
-			return false;
-		if (gridline == null) {
-			if (other.gridline != null)
-				return false;
-		} else if (!gridline.equals(other.gridline))
-			return false;
-		return true;
-	}
+    
+    /*
+     * Generated hash code function (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((colours == null) ? 0 : colours.hashCode());
+        result = prime * result + ((gridline == null) ? 0 : gridline.hashCode());
+        return result;
+    }
+    
+    /*
+     * Generated equals function (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FractalColourScheme other = (FractalColourScheme) obj;
+        if (colours == null) {
+            if (other.colours != null)
+                return false;
+        } else if (!colours.equals(other.colours))
+            return false;
+        if (gridline == null) {
+            if (other.gridline != null)
+                return false;
+        } else if (!gridline.equals(other.gridline))
+            return false;
+        return true;
+    }
 }

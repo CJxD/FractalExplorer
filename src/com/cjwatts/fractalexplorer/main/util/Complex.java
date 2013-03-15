@@ -57,8 +57,8 @@ public final class Complex {
      * @return Square of the complex number
      */
     public Complex square() {
-    	// Real = a^2 - b^2
-    	// Im = 2ab
+        // Real = a^2 - b^2
+        // Im = 2ab
         double rNew = re * re - im * im;
         double iNew = 2 * (re * im);
         return new Complex(rNew, iNew);

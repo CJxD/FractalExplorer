@@ -34,24 +34,24 @@ import com.cjwatts.fractalexplorer.main.util.Complex;
  * Automatically saves to disk after modification
  */
 public class Favourites implements List<Favourite> {
-
-	private String filename = "favourites.xml";
-	private List<Favourite> list = new ArrayList<Favourite>();
-	
-	/*
-	 * Warning: There is a LOT of nesting going on with the XML stuff
-	 * Be prepared for dragons!
-	 * At least it's stable - stupid SnakeYAML
-	 */
-	
-	/**
-	 * Load the favourites file into memory
-	 * @throws IOException
-	 */
-	public void load() throws IOException {
-	    try {
+    
+    private String filename = "favourites.xml";
+    private List<Favourite> list = new ArrayList<Favourite>();
+    
+    /*
+     * Warning: There is a LOT of nesting going on with the XML stuff Be
+     * prepared for dragons! At least it's stable - stupid SnakeYAML
+     */
+    
+    /**
+     * Load the favourites file into memory
+     * @throws IOException
+     */
+    public void load() throws IOException {
+        try {
             // Get XML document
-            // (thanks to http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
+            // (thanks to
+            // http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.parse(filename);
@@ -103,7 +103,8 @@ public class Favourites implements List<Favourite> {
                         }
                         algorithm = BaseFractalAlgorithm.getByName(aName);
                         // Panic default
-                        if (algorithm == null) algorithm = new MandelbrotAlgorithm();
+                        if (algorithm == null)
+                            algorithm = new MandelbrotAlgorithm();
                         algorithm.setIterations(aIterations);
                         algorithm.setEscapeRadius(aEscapeRadius);
                     }
@@ -133,7 +134,8 @@ public class Favourites implements List<Favourite> {
                     if (n2.getNodeName().equals("scheme")) {
                         l2 = n2.getChildNodes();
                         
-                        // Attributes should be fed directly into the colour scheme
+                        // Attributes should be fed directly into the colour
+                        // scheme
                         scheme = new FractalColourScheme();
                         
                         for (int k = 0; k < l2.getLength(); k++) {
@@ -175,11 +177,7 @@ public class Favourites implements List<Favourite> {
                     // </scheme>
                 }
                 // Commit the data
-                loaded.add(new Favourite(
-                        name,
-                        algorithm,
-                        selected,
-                        scheme));
+                loaded.add(new Favourite(name, algorithm, selected, scheme));
             }
             // Request a cleanup of all those objects now
             System.gc();
@@ -200,81 +198,80 @@ public class Favourites implements List<Favourite> {
             else
                 throw new IOException(ex);
         }
-	}
-	
-	/**
-	 * Save the favourites file to disk
-	 * @throws IOException
-	 */
-	public void save() throws IOException {
-	    try {
-	        // Generate XML builder
-	        // (thanks to http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
-	        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-	        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-    		Document doc = docBuilder.newDocument();
-    		
-    		// Required element level objects
+    }
+    
+    /**
+     * Save the favourites file to disk
+     * @throws IOException
+     */
+    public void save() throws IOException {
+        try {
+            // Generate XML builder
+            // (thanks to
+            // http://www.mkyong.com/java/how-to-create-xml-file-in-java-dom/)
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+            
+            // Required element level objects
             Element e0, e1, e2, e3, e4, e5;
-    		
-    		// <favourites>
+            
+            // <favourites>
             e0 = doc.createElement("favourites");
             for (Favourite f : list) {
                 // <favourite name="">
                 e1 = doc.createElement("favourite");
                 e1.setAttribute("name", f.getName());
-                //   <algorithm name="">
+                // <algorithm name="">
                 e2 = doc.createElement("algorithm");
                 e2.setAttribute("name", f.getAlgorithm().getName());
-                //     <iterations>
+                // <iterations>
                 e3 = doc.createElement("iterations");
                 e3.appendChild(doc.createTextNode(f.getAlgorithm().getIterations() + ""));
                 e2.appendChild(e3);
-                //     <escaperadius>
+                // <escaperadius>
                 e3 = doc.createElement("escaperadius");
                 e3.appendChild(doc.createTextNode(f.getAlgorithm().getEscapeRadius() + ""));
                 e2.appendChild(e3);
-                //   </algorithm>
+                // </algorithm>
                 e1.appendChild(e2);
-                //   <selected>
+                // <selected>
                 e2 = doc.createElement("selected");
-                //     <real>
+                // <real>
                 e3 = doc.createElement("real");
                 e3.appendChild(doc.createTextNode(f.getSelected().real() + ""));
                 e2.appendChild(e3);
-                //     <imaginary>
+                // <imaginary>
                 e3 = doc.createElement("imaginary");
                 e3.appendChild(doc.createTextNode(f.getSelected().imaginary() + ""));
                 e2.appendChild(e3);
-                //   </selected>
+                // </selected>
                 e1.appendChild(e2);
-                //   <scheme>
+                // <scheme>
                 e2 = doc.createElement("scheme");
-                //     <gridlines>
+                // <gridlines>
                 e3 = doc.createElement("gridlines");
-                e3.appendChild(doc.createTextNode(
-                        serialiseColour(f.getScheme().getGridlineColour())));
+                e3.appendChild(doc.createTextNode(serialiseColour(f.getScheme().getGridlineColour())));
                 e2.appendChild(e3);
-                //     <colours>
+                // <colours>
                 e3 = doc.createElement("colours");
                 for (Map.Entry<Double, Color> entry : f.getScheme().entrySet()) {
-                    //   <colourstop>
+                    // <colourstop>
                     e4 = doc.createElement("colourstop");
-                    //     <progress>
+                    // <progress>
                     e5 = doc.createElement("progress");
                     e5.appendChild(doc.createTextNode(entry.getKey() + ""));
                     e4.appendChild(e5);
-                    //     <colour>
+                    // <colour>
                     e5 = doc.createElement("colour");
-                    e5.appendChild(doc.createTextNode(
-                            serialiseColour(entry.getValue())));
+                    e5.appendChild(doc.createTextNode(serialiseColour(entry.getValue())));
                     e4.appendChild(e5);
-                    //   </colourstop>
+                    // </colourstop>
                     e3.appendChild(e4);
                 }
-                //     </colours>
+                // </colours>
                 e2.appendChild(e3);
-                //   </scheme>
+                // </scheme>
                 e1.appendChild(e2);
                 // </favourite>
                 e0.appendChild(e1);
@@ -299,272 +296,272 @@ public class Favourites implements List<Favourite> {
             StreamResult result = new StreamResult(filename);
             transformer.transform(source, result);
             
-	    } catch (Exception ex) {
-	        // Re-throw XML generation exceptions as IOExceptions
-	        if (ex instanceof IOException)
+        } catch (Exception ex) {
+            // Re-throw XML generation exceptions as IOExceptions
+            if (ex instanceof IOException)
                 throw (IOException) ex;
             else
                 throw new IOException(ex);
         }
-	}
-
-	/**
-	 * @return String representation of colour for nice XML
-	 */
-	private String serialiseColour(Color c) {
-	    return c.getRed()+" "+c.getGreen()+" "+c.getBlue();
-	}
-	
-	/**
-	 * @param c Serialised colour string
-	 * @return Colour from string
-	 * @throws NumberFormatException if colour not valid
-	 */
-	private Color deserialiseColour(String c) throws NumberFormatException {
-	    String[] parts = c.split(" ");
-	    int r, g, b, a;
-	    Color result;
-	    if (parts.length >= 3) {
-	        r = Integer.parseInt(parts[0]);
-	        g = Integer.parseInt(parts[1]);
-	        b = Integer.parseInt(parts[2]);
-	        result = new Color(r, g, b);
-	    } else {
-	        throw new NumberFormatException(c + " is not a valid colour!");
-	    }
-	    // Bonus: Secret alpha channel support
-	    if (parts.length == 4) {
-	        a = Integer.parseInt(parts[3]);
-	        result = new Color(r, g, b, a);
-	    }
-	    return result;
-	}
-	
-	
-	@Override
-	public boolean add(Favourite arg0) {
-		boolean result = list.add(arg0);
-		if (result)
-			try {
-				Collections.sort(list);
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-	}
-
-	@Override
-	public void add(int arg0, Favourite arg1) {
-		list.add(arg0, arg1);
-		try {
-			save();
-		} catch (IOException ex) {
-			System.err.println("Autosave failed - " + ex.getMessage());
-			ex.printStackTrace();
-		}
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends Favourite> arg0) {
-		boolean result = list.addAll(arg0);
-		if (result)
-			try {
-				Collections.sort(list);
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-	}
-
-	@Override
-	public boolean addAll(int arg0, Collection<? extends Favourite> arg1) {
-		boolean result = list.addAll(arg0, arg1);
-		if (result)
-			try {
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-	}
-
-	@Override
-	public void clear() {
-		list.clear();
-		try {
-			save();
-		} catch (IOException ex) {
-			System.err.println("Autosave failed - " + ex.getMessage());
-			ex.printStackTrace();
-		}
-	}
-
-	@Override
-	public boolean contains(Object arg0) {
-		return list.contains(arg0);
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> arg0) {
-		return list.containsAll(arg0);
-	}
-
-	@Override
-	public Favourite get(int arg0) {
-		return list.get(arg0);
-	}
-	
-	/**
-	 * Return an entry by its name
-	 * @param name
-	 */
-	public Favourite getByName(String name) {
-		return getByName(name, 0, list.size() - 1);
-	}
-	
-	/**
-	 * Recursive helper function for binary search
-	 * @param name
-	 * @param lower Lower bound of search
-	 * @param upper Upper bound of search
-	 */
-	private Favourite getByName(String name, int lower, int upper) {
-	    if (upper - lower <= 0) return null;
-		// Compare the middle element to the search name
-		int mid = lower + upper / 2;
-		int compare = list.get(mid).getName().compareTo(name);
-
-		if (compare < 0)
-			return getByName(name, lower, mid);
-		else if (compare > 0)
-			return getByName(name, mid + 1, upper);
-		else
-			return list.get(compare);
-	}
-
-	@Override
-	public int indexOf(Object arg0) {
-		return list.indexOf(arg0);
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return list.isEmpty();
-	}
-
-	@Override
-	public Iterator<Favourite> iterator() {
-		return list.iterator();
-	}
-
-	@Override
-	public int lastIndexOf(Object arg0) {
-		return list.lastIndexOf(arg0);
-	}
-
-	@Override
-	public ListIterator<Favourite> listIterator() {
-		return list.listIterator();
-	}
-
-	@Override
-	public ListIterator<Favourite> listIterator(int arg0) {
-		return list.listIterator(arg0);
-	}
-
-	@Override
-	public boolean remove(Object arg0) {
-		boolean result = list.remove(arg0);
-		if (result)
-			try {
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-	}
-
-	@Override
-	public Favourite remove(int arg0) {
-		Favourite result = list.remove(arg0);
-		try {
-			save();
-		} catch (IOException ex) {
-			System.err.println("Autosave failed - " + ex.getMessage());
-			ex.printStackTrace();
-		}
-		return result;
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> arg0) {
-		boolean result = list.removeAll(arg0);
-		if (result)
-			try {
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> arg0) {
-		boolean result = list.retainAll(arg0);
-		if (result)
-			try {
-				save();
-			} catch (IOException ex) {
-				System.err.println("Autosave failed - " + ex.getMessage());
-				ex.printStackTrace();
-				return false;
-			}
-		return result;
-		
-	}
-
-	@Override
-	public Favourite set(int arg0, Favourite arg1) {
-		Favourite result = list.set(arg0, arg1);
-		try {
-			save();
-		} catch (IOException ex) {
-			System.err.println("Autosave failed - " + ex.getMessage());
-			ex.printStackTrace();
-		}
-		return result;
-	}
-
-	@Override
-	public int size() {
-		return list.size();
-	}
-
-	@Override
-	public List<Favourite> subList(int arg0, int arg1) {
-		return list.subList(arg0, arg1);
-	}
-
-	@Override
-	public Object[] toArray() {
-		return list.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] arg0) {
-		return list.toArray(arg0);
-	}
-	
+    }
+    
+    /**
+     * @return String representation of colour for nice XML
+     */
+    private String serialiseColour(Color c) {
+        return c.getRed() + " " + c.getGreen() + " " + c.getBlue();
+    }
+    
+    /**
+     * @param c Serialised colour string
+     * @return Colour from string
+     * @throws NumberFormatException if colour not valid
+     */
+    private Color deserialiseColour(String c) throws NumberFormatException {
+        String[] parts = c.split(" ");
+        int r, g, b, a;
+        Color result;
+        if (parts.length >= 3) {
+            r = Integer.parseInt(parts[0]);
+            g = Integer.parseInt(parts[1]);
+            b = Integer.parseInt(parts[2]);
+            result = new Color(r, g, b);
+        } else {
+            throw new NumberFormatException(c + " is not a valid colour!");
+        }
+        // Bonus: Secret alpha channel support
+        if (parts.length == 4) {
+            a = Integer.parseInt(parts[3]);
+            result = new Color(r, g, b, a);
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean add(Favourite arg0) {
+        boolean result = list.add(arg0);
+        if (result)
+            try {
+                Collections.sort(list);
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+    }
+    
+    @Override
+    public void add(int arg0, Favourite arg1) {
+        list.add(arg0, arg1);
+        try {
+            save();
+        } catch (IOException ex) {
+            System.err.println("Autosave failed - " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends Favourite> arg0) {
+        boolean result = list.addAll(arg0);
+        if (result)
+            try {
+                Collections.sort(list);
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+    }
+    
+    @Override
+    public boolean addAll(int arg0, Collection<? extends Favourite> arg1) {
+        boolean result = list.addAll(arg0, arg1);
+        if (result)
+            try {
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+    }
+    
+    @Override
+    public void clear() {
+        list.clear();
+        try {
+            save();
+        } catch (IOException ex) {
+            System.err.println("Autosave failed - " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public boolean contains(Object arg0) {
+        return list.contains(arg0);
+    }
+    
+    @Override
+    public boolean containsAll(Collection<?> arg0) {
+        return list.containsAll(arg0);
+    }
+    
+    @Override
+    public Favourite get(int arg0) {
+        return list.get(arg0);
+    }
+    
+    /**
+     * Return an entry by its name
+     * @param name
+     */
+    public Favourite getByName(String name) {
+        return getByName(name, 0, list.size() - 1);
+    }
+    
+    /**
+     * Recursive helper function for binary search
+     * @param name
+     * @param lower Lower bound of search
+     * @param upper Upper bound of search
+     */
+    private Favourite getByName(String name, int lower, int upper) {
+        if (upper - lower <= 0)
+            return null;
+        // Compare the middle element to the search name
+        int mid = lower + upper / 2;
+        int compare = list.get(mid).getName().compareTo(name);
+        
+        if (compare < 0)
+            return getByName(name, lower, mid);
+        else if (compare > 0)
+            return getByName(name, mid + 1, upper);
+        else
+            return list.get(compare);
+    }
+    
+    @Override
+    public int indexOf(Object arg0) {
+        return list.indexOf(arg0);
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+    
+    @Override
+    public Iterator<Favourite> iterator() {
+        return list.iterator();
+    }
+    
+    @Override
+    public int lastIndexOf(Object arg0) {
+        return list.lastIndexOf(arg0);
+    }
+    
+    @Override
+    public ListIterator<Favourite> listIterator() {
+        return list.listIterator();
+    }
+    
+    @Override
+    public ListIterator<Favourite> listIterator(int arg0) {
+        return list.listIterator(arg0);
+    }
+    
+    @Override
+    public boolean remove(Object arg0) {
+        boolean result = list.remove(arg0);
+        if (result)
+            try {
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+    }
+    
+    @Override
+    public Favourite remove(int arg0) {
+        Favourite result = list.remove(arg0);
+        try {
+            save();
+        } catch (IOException ex) {
+            System.err.println("Autosave failed - " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean removeAll(Collection<?> arg0) {
+        boolean result = list.removeAll(arg0);
+        if (result)
+            try {
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+    }
+    
+    @Override
+    public boolean retainAll(Collection<?> arg0) {
+        boolean result = list.retainAll(arg0);
+        if (result)
+            try {
+                save();
+            } catch (IOException ex) {
+                System.err.println("Autosave failed - " + ex.getMessage());
+                ex.printStackTrace();
+                return false;
+            }
+        return result;
+        
+    }
+    
+    @Override
+    public Favourite set(int arg0, Favourite arg1) {
+        Favourite result = list.set(arg0, arg1);
+        try {
+            save();
+        } catch (IOException ex) {
+            System.err.println("Autosave failed - " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return result;
+    }
+    
+    @Override
+    public int size() {
+        return list.size();
+    }
+    
+    @Override
+    public List<Favourite> subList(int arg0, int arg1) {
+        return list.subList(arg0, arg1);
+    }
+    
+    @Override
+    public Object[] toArray() {
+        return list.toArray();
+    }
+    
+    @Override
+    public <T> T[] toArray(T[] arg0) {
+        return list.toArray(arg0);
+    }
+    
 }

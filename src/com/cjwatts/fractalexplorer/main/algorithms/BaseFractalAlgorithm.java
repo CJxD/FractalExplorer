@@ -7,14 +7,15 @@ import org.reflections.Reflections;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
-	
-	protected int iterations = 100;
+    
+    protected int iterations = 100;
     protected double escapeRadius = 2.0;
     protected double escapeSquared = 4.0;
     
     private static final double LOG_2 = Math.log(2);
     
-    public BaseFractalAlgorithm() {}
+    public BaseFractalAlgorithm() {
+    }
     
     public BaseFractalAlgorithm(int iterations, double escapeRadius) {
         setIterations(iterations);
@@ -26,7 +27,7 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
      */
     public static Set<Class<? extends BaseFractalAlgorithm>> getSubClasses() {
         // Get a list of all classes extending this in the same package
-        Reflections reflections = new Reflections("com.cjwatts.fractalexplorer.main.algorithms");    
+        Reflections reflections = new Reflections("com.cjwatts.fractalexplorer.main.algorithms");
         return reflections.getSubTypesOf(BaseFractalAlgorithm.class);
     }
     
@@ -39,7 +40,8 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         
         BaseFractalAlgorithm result = null;
         try {
-            // Find an algorithm with a matching name and return a new instance of it
+            // Find an algorithm with a matching name and return a new instance
+            // of it
             for (Class<? extends BaseFractalAlgorithm> a : algorithms) {
                 BaseFractalAlgorithm instance = a.newInstance();
                 if (instance.getName() == name) {
@@ -54,7 +56,7 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     }
     
     public double escapeTime(Complex point) {
-    	return escapeTime(point, point);
+        return escapeTime(point, point);
     }
     
     /**
@@ -77,16 +79,16 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
      */
     protected double normalise(Complex c, int d) {
         if (d == iterations) {
-        	return iterations;
+            return iterations;
         } else if (d == 0) {
-        	return 0;
+            return 0;
         } else {
-        	double modSquared = c.modulusSquared();
-        	return (d - (Math.log(Math.log(modSquared))) / LOG_2) / (iterations);
+            double modSquared = c.modulusSquared();
+            return (d - (Math.log(Math.log(modSquared))) / LOG_2) / (iterations);
         }
     }
-
-	/**
+    
+    /**
      * @return Name of the algorithm
      */
     public abstract String getName();
@@ -109,40 +111,39 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
     }
     
     /*
-	 * Generated hash code function
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
+     * Generated hash code function (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(escapeRadius);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + iterations;
-		return result;
-	}
-
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(escapeRadius);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + iterations;
+        return result;
+    }
+    
     /*
-	 * Generated equals function
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BaseFractalAlgorithm other = (BaseFractalAlgorithm) obj;
-		if (Double.doubleToLongBits(escapeRadius) != Double
-				.doubleToLongBits(other.escapeRadius))
-			return false;
-		if (iterations != other.iterations)
-			return false;
-		return true;
-	}
+     * Generated equals function (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BaseFractalAlgorithm other = (BaseFractalAlgorithm) obj;
+        if (Double.doubleToLongBits(escapeRadius) != Double.doubleToLongBits(other.escapeRadius))
+            return false;
+        if (iterations != other.iterations)
+            return false;
+        return true;
+    }
 }
