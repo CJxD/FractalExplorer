@@ -20,7 +20,8 @@ Original spec is (was) found here: https://secure.ecs.soton.ac.uk/notes/comp1206
 The following extensions have been made past the specification:
 
   * Favourites are stored in favourites.xml
-  * Image rendering is multithreaded, and if available, CUDA is used to help compute the points.
+  * Image rendering is multithreaded.
+  * A progress bar is shown on the main fractal for render progress.
   * Images are buffered for fast response times when the fractals are not modified.
   * Many fractal algorithms are provided, and writing your own is easily done through extending the FractalAlgorithm class.
   * The coordinate control spinners are logarithmic for pleasant scrolling.
@@ -31,4 +32,5 @@ The following extensions have been made past the specification:
   
 ### Known caveats
 
-  * There is currently no GUI support for editing a colour scheme - you can only select pre-existing ones.  
+  * There is currently no GUI support for editing a colour scheme - you can only select pre-existing ones.
+  * This was going to use OpenCL/CUDA, but because of the bulk of the native libraries required to ship with the program, it's so not worth it.

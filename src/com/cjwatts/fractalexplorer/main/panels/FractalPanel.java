@@ -5,10 +5,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.ColorModel;
 import java.awt.image.BufferedImage;
+import java.awt.image.DirectColorModel;
 import java.awt.image.WritableRaster;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 import com.cjwatts.fractalexplorer.main.FractalColourScheme;
@@ -25,10 +32,10 @@ public class FractalPanel extends JPanel {
     public static final double DEFAULT_IMAGINARY_MIN = -1.6;
     public static final double DEFAULT_IMAGINARY_MAX = 1.6;
     
-    private double xmin = DEFAULT_REAL_MIN;
-    private double xmax = DEFAULT_REAL_MAX;
-    private double ymin = DEFAULT_IMAGINARY_MIN;
-    private double ymax = DEFAULT_IMAGINARY_MAX;
+    private double rmin = DEFAULT_REAL_MIN;
+    private double rmax = DEFAULT_REAL_MAX;
+    private double imin = DEFAULT_IMAGINARY_MIN;
+    private double imax = DEFAULT_IMAGINARY_MAX;
     
     // Put crosshairs and zoom rectangle off-screen
     private Point crosshairs;
@@ -38,10 +45,26 @@ public class FractalPanel extends JPanel {
     private FractalColourScheme scheme = FractalColourScheme.DEFAULT;
     
     private final RenderCache cache = new RenderCache();
-    private SwingWorker<Void, Void> worker;
+    private JProgressBar progressBar;
+    private SwingWorker<Integer, Integer> worker;
     
+    /**
+     * Create a new fractal panel with a given algorithm
+     * @param algorithm
+     */
     public FractalPanel(FractalAlgorithm algorithm) {
         this.setAlgorithm(algorithm);
+    }
+    
+    /**
+     * Create a new fractal panel with a given algorithm
+     * Report progress to the given ProgressBar
+     * @param algorithm
+     * @param progressBar JProgressBar to attach
+     */
+    public FractalPanel(FractalAlgorithm algorithm, JProgressBar progressBar) {
+        this(algorithm);
+        this.progressBar = progressBar;
     }
     
     @Override
@@ -54,18 +77,34 @@ public class FractalPanel extends JPanel {
         if (cache.isDirty()) {
             // If the previous worker isn't finished, cancel it
             if (worker != null && !worker.isDone()) worker.cancel(true);
-            worker = new SwingWorker<Void, Void>() {
-                private Renderer renderer = new Renderer(0, 0, width, height);
+            
+            worker = new SwingWorker<Integer, Integer>() {
+                private Renderer renderer = new Renderer(width, height);
                 
                 @Override
-                protected Void doInBackground() throws Exception {
-                    // Run a new render instance in this thread
-                    renderer.run();
-                    return null;
+                protected Integer doInBackground() throws Exception {
+                    // Run a new render and monitor progress
+                    new Thread(renderer).start();
+                    while (!renderer.isRendered()) {
+                        publish(renderer.getProgress());
+                    }
+                    return renderer.getProgress();
+                }
+                
+                @Override
+                protected void process(List<Integer> chunks) {
+                    if (progressBar != null) {
+                        progressBar.setValue(chunks.get(0));
+                    }
                 }
                 
                 @Override
                 protected void done() {
+                    // Reset progress bar
+                    if (progressBar != null) {
+                        progressBar.setValue(0);
+                    }
+                    // Set the render image
                     cache.setImage(renderer.getRender());
                     repaint();
                 }
@@ -74,7 +113,7 @@ public class FractalPanel extends JPanel {
         }
         
         // Draw the fractal
-        g2.drawImage(cache.getImage(), 0, 0, width, height, null);
+        g2.drawImage(cache.getImage(), 0, 0, null);
         
         Color c = scheme.getGridlineColour();
         g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 80));
@@ -102,18 +141,14 @@ public class FractalPanel extends JPanel {
      * Data structure to hold cached renders
      */
     public class RenderCache {
-        int hashCode;
-        BufferedImage image;
+	private int hashCode;
+        private BufferedImage image;
         private boolean invalid = false;
-        
-        public RenderCache() {
-            this.hashCode = FractalPanel.this.hashCode();
-        }
         
         /**
          * Mark the cache as dirty to force a re-render
          */
-        public void invalidate() {
+        public synchronized void invalidate() {
             this.invalid = true;
         }
         
@@ -121,7 +156,7 @@ public class FractalPanel extends JPanel {
          * Determine whether the cache entry needs updating
          * @return True if cache needs updating
          */
-        public boolean isDirty() {
+        public synchronized boolean isDirty() {
             int oldHash = hashCode;
             hashCode = FractalPanel.this.hashCode();
             
@@ -132,7 +167,7 @@ public class FractalPanel extends JPanel {
          * Get the image from the cache
          * @return
          */
-        public BufferedImage getImage() {
+        public synchronized BufferedImage getImage() {
             return image;
         }
         
@@ -140,7 +175,7 @@ public class FractalPanel extends JPanel {
          * Set the image in the cache
          * @param image
          */
-        public void setImage(BufferedImage image) {
+        public synchronized void setImage(BufferedImage image) {
             this.image = image;
             this.invalid = false;
         }
@@ -148,87 +183,165 @@ public class FractalPanel extends JPanel {
     }
     
     /**
-     * Recursive renderer to off-load image rendering to multiple threads
+     * Rendering mechanism to off-load image rendering into multiple sub-threads
      */
-    public class Renderer extends Thread {
+    public class Renderer implements Runnable {
         
-        public static final int MAX_TILE_AREA = 2000;
+	// Thread pool
+        private ExecutorService pool;
+        // Timeout in milliseconds
+        private long timeout = 1000000;
         
-        protected int x1, y1, x2, y2;
+        // Tile storage
+        private WritableRaster[][] tiles;
+        private ColorModel model;
         
-        protected BufferedImage render;
+        // Metrics
+        private int width, height;
+        private int tilesX, tilesY;
+        private int tileW, tileH;
         
-        public Renderer(int x1, int y1, int x2, int y2) {
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
+        // Progress actually just counts the number of tiles rendered, not percentage
+        private Integer progress = 0;
+        
+        /**
+         * Create a new fractal image renderer
+         * @param width
+         * @param height
+         */
+        public Renderer(int width, int height) {
+            // Create a renderer based on the number of cores/threads available
+            this(width, height, Runtime.getRuntime().availableProcessors());
+        }
+        /**
+         * Create a new fractal renderer with a specific number of threads in the pool
+         * @param width
+         * @param height
+         * @param numThreads
+         */
+        public Renderer(int width, int height, int numThreads) {
+            pool = Executors.newFixedThreadPool(numThreads);
+            
+            this.width = width;
+            this.height = height;
+            
+            // Calculate number of tiles in X and Y
+            this.tilesX = (int) Math.floor(Math.sqrt(numThreads));
+            this.tilesY = numThreads / tilesX;
+            
+            this.tileW = width / tilesX;
+            this.tileH = height / (numThreads / tilesY);
+            
+            // Initialise tiles
+            this.tiles = new WritableRaster[tilesX][tilesY];
+            this.model = new DirectColorModel(24, 0xFF0000, 0x00FF00, 0x0000FF);
+            for (int i = 0; i < tilesX; i++) {
+            	for (int j = 0; j < tilesY; j++) {
+            	    tiles[i][j] = model.createCompatibleWritableRaster(tileW, tileH);
+            	}
+            }
+        }
+
+        @Override
+        public void run() {
+            progress = 0;
+            for (int i = 0; i < tilesX; i++) {
+                for (int j = 0; j < tilesY; j++) {
+                    pool.execute(new RenderThread(
+                	    tiles[i][j],
+                	    i * tileW, // This is the horizontal position of the tile
+                	    j * tileH)); // and this is the vertical position
+                }
+            }
+            pool.shutdown();
+            
+            try {
+                pool.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+    	    } catch (InterruptedException ex) {
+    	        pool.shutdownNow();
+    		return;
+    	    }
+        }
+        
+        private class RenderThread implements Runnable {
+            private WritableRaster tile;
+            private int rmin, imin, rmax, imax;
+            
+            public RenderThread(WritableRaster tile, int x, int y) {
+                this.tile = tile;
+                this.rmin = x;
+                this.imin = y;
+                this.rmax = x + tile.getWidth();
+                this.imax = y + tile.getHeight();
+            }
+            
+            @Override
+            public void run() {
+                int rgb;
+                // Loop across each pixel
+                for (int x = rmin; x < rmax; x++) {
+                    for (int y = imin; y < imax; y++) {
+                        // Draw the pixel with calculated colour
+                        rgb = getPixelColour(x, y).getRGB();
+                        tile.setPixel(x - rmin, y - imin,
+                                new int[] {
+                                    // Bit-shifting and modulus to extract r,g,b
+                                    rgb >> 16,
+                                    (rgb >> 8) % 256,
+                                    rgb % 256}
+                                );
+                    }
+                }
+                synchronized (progress) {
+                    progress++;
+                }
+            }
         }
         
         /**
-         * Fetch the rendered image
+         * @return The rendered image
          */
-        public BufferedImage getRender() throws IllegalStateException {
-            if (render == null) {
-                throw new IllegalStateException("Fractal is not rendered.");
+        public BufferedImage getRender() {
+            BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = output.createGraphics();
+            BufferedImage temp;
+            for (int i = 0; i < tilesX; i++) {
+            	for (int j = 0; j < tilesY; j++) {
+            	    temp = new BufferedImage(model, tiles[i][j], model.isAlphaPremultiplied(), null);
+            	    g2.drawImage(
+            		    temp,
+            		    i * tileW,
+            		    j * tileH,
+            		    tileW,
+            		    tileH,
+            		    null);
+            	}
             }
+            // Clean up all the temporary stuff
+            temp = null;
+            System.gc();
             
-            return render;
+            return output;
         }
         
-        @Override
-        public void run() {
-            int sizeX = x2 - x1;
-            int sizeY = y2 - y1;
-            
-            render = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
-            
-            // If image is too big, split into 4
-            if (sizeX * sizeY > MAX_TILE_AREA) {
-                int halfX = x1 + sizeX / 2;
-                int halfY = y1 + sizeY / 2;
-                Renderer[] renderers = new Renderer[4];
-                renderers[0] = new Renderer(x1, y1, halfX, halfY);
-                renderers[1] = new Renderer(halfX, y1, x2, halfY);
-                renderers[2] = new Renderer(x1, halfY, halfX, y2);
-                renderers[3] = new Renderer(halfX, halfY, x2, y2);
-                
-                // Start threads
-                for (Renderer r : renderers) {
-                    r.start();
-                }
-                // Wait for threads
-                for (Renderer r : renderers) {
-                    try {
-                        r.join();
-                    } catch (InterruptedException ex) {
-                        return;
-                    }
-                }
-                
-                Graphics2D g2 = render.createGraphics();
-                for (Renderer r : renderers) {
-                    // Paint each subimage onto the main image
-                    g2.drawImage(r.getRender(), r.x1 - this.x1, r.y1 - this.y1, r.x2 - r.x1, r.y2 - r.y1, null);
-                }
+        /**
+         * @return The percentage progress of the render job
+         */
+        public int getProgress() {
+            int p;
+            synchronized (progress) {
+                p = this.progress;
             }
-            // Otherwise, render
-            else {
-                // setPixel is faster than using setRGB
-                WritableRaster raster = render.getRaster();
-                int rgb;
-                // Loop across each pixel
-                for (int x = x1; x < x2; x++) {
-                    for (int y = y1; y < y2; y++) {
-                        // Draw the pixel with calculated colour
-                        rgb = getPixelColour(x, y).getRGB();
-                        raster.setPixel(x - x1, y - y1, new int[] {
-                                // Bit-shifting and modulus to extract r,g,b
-                        rgb >> 16, (rgb >> 8) % 256, rgb % 256 });
-                    }
-                }
-            }
+            return (100 * p) / (tilesX * tilesY);
         }
+        
+        /**
+         * @return True if render is complete
+         */
+        public boolean isRendered() {
+            return progress == (tilesX * tilesY);
+        }
+        
     }
     
     /**
@@ -251,13 +364,13 @@ public class FractalPanel extends JPanel {
 	        double calcY = y - height / 2;
 	        
 	        // Scale the axes
-	        calcX *= (xmax - xmin) / width;
-	        calcY *= (ymax - ymin) / height;
+	        calcX *= (rmax - rmin) / width;
+	        calcY *= (imax - imin) / height;
 	        
 	        // Calculate zoom offsets
 	        // Add the average of the x and y space
-	        calcX += (xmin + xmax) / 2;
-	        calcY += (ymin + ymax) / 2;
+	        calcX += (rmin + rmax) / 2;
+	        calcY += (imin + imax) / 2;
 	        
 	        return new Complex(calcX, calcY);
         }
@@ -304,10 +417,25 @@ public class FractalPanel extends JPanel {
     }
     
     /**
+     * Attach a progress bar to report progress to
+     * @param progressBar
+     */
+    public void attachProgressBar(JProgressBar progressBar) {
+        this.progressBar = progressBar;
+    }
+    
+    /**
+     * Remove any attached progress bars
+     */
+    public void removeProgressBar() {
+	this.progressBar = null;
+    }
+    
+    /**
      * Set the complex coordinate bounds of the fractal panel
      * 
-     * @param point1
-     * @param point2
+     * @param point1 Bottom left (minimum) complex point
+     * @param point2 Top right (maximum) complex point
      */
     public void setComplexBounds(Complex point1, Complex point2) {
         setComplexBounds(point1.real(), point2.real(), point1.imaginary(), point2.imaginary());
@@ -316,16 +444,16 @@ public class FractalPanel extends JPanel {
     /**
      * Set the complex coordinate bounds of the fractal panel
      * 
-     * @param xmin
-     * @param xmax
-     * @param ymin
-     * @param ymax
+     * @param rmin
+     * @param rmax
+     * @param imin
+     * @param imax
      */
-    public void setComplexBounds(double xmin, double xmax, double ymin, double ymax) {
-        this.xmin = xmin;
-        this.xmax = xmax;
-        this.ymin = ymin;
-        this.ymax = ymax;
+    public void setComplexBounds(double rmin, double rmax, double imin, double imax) {
+        this.rmin = rmin;
+        this.rmax = rmax;
+        this.imin = imin;
+        this.imax = imax;
         this.repaint();
     }
     
@@ -374,13 +502,13 @@ public class FractalPanel extends JPanel {
 				+ ((algorithm == null) ? 0 : algorithm.hashCode());
 		result = prime * result + ((scheme == null) ? 0 : scheme.hashCode());
 		long temp;
-		temp = Double.doubleToLongBits(xmax);
+		temp = Double.doubleToLongBits(rmax);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(xmin);
+		temp = Double.doubleToLongBits(rmin);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(ymax);
+		temp = Double.doubleToLongBits(imax);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(ymin);
+		temp = Double.doubleToLongBits(imin);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
@@ -409,17 +537,17 @@ public class FractalPanel extends JPanel {
 				return false;
 		} else if (!scheme.equals(other.scheme))
 			return false;
-		if (Double.doubleToLongBits(xmax) != Double
-				.doubleToLongBits(other.xmax))
+		if (Double.doubleToLongBits(rmax) != Double
+				.doubleToLongBits(other.rmax))
 			return false;
-		if (Double.doubleToLongBits(xmin) != Double
-				.doubleToLongBits(other.xmin))
+		if (Double.doubleToLongBits(rmin) != Double
+				.doubleToLongBits(other.rmin))
 			return false;
-		if (Double.doubleToLongBits(ymax) != Double
-				.doubleToLongBits(other.ymax))
+		if (Double.doubleToLongBits(imax) != Double
+				.doubleToLongBits(other.imax))
 			return false;
-		if (Double.doubleToLongBits(ymin) != Double
-				.doubleToLongBits(other.ymin))
+		if (Double.doubleToLongBits(imin) != Double
+				.doubleToLongBits(other.imin))
 			return false;
 		return true;
 	}

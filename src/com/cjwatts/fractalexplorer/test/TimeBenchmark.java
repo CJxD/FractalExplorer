@@ -42,13 +42,12 @@ public class TimeBenchmark {
 		Complex test2 = new Complex(-0.931647, -0.66725521);
 		Complex test3 = new Complex(0.151654, 0.313412);
 		
-		int tileX = 50, tileY = FractalPanel.Renderer.MAX_TILE_AREA / 50;
+		//int tileX = 50, tileY = FractalPanel.Renderer.MAX_TILE_AREA / 50;
 		
 		// Get classes
 		Class<Complex> cClass = Complex.class;
 		Class<BaseFractalAlgorithm> faClass = BaseFractalAlgorithm.class;
 		Class<FractalPanel> fpClass = FractalPanel.class;
-		Class<FractalPanel.Renderer> fprClass = FractalPanel.Renderer.class;
 		Class<FractalColourScheme> fcsClass = FractalColourScheme.class;
 		
 		// Set up results
@@ -154,11 +153,6 @@ public class TimeBenchmark {
 				// Average
 				pixelRender[i] /= 3;
 				
-				// Tile rendering
-				tileRender[i] = getTime(
-						fprClass.getMethod("run"),
-						fractal.new Renderer(0, 0, tileX, tileY));
-				
 				// Total rendering
 				totalRender[i] = getTime(
 						fpClass.getMethod("repaint"),
@@ -181,7 +175,7 @@ public class TimeBenchmark {
 		}
 		
 		// Headers
-		String output = "Complex Add,Complex Square,Complex Mod,Coordinate Conversion,Algorithm Time,Colour Mapping,Pixel Render,Tile Render,Total Render\n";
+		String output = "Complex Add,Complex Square,Complex Mod,Coordinate Conversion,Algorithm Time,Colour Mapping,Pixel Render,Total Render\n";
 		
 		// Sort test results
 		Arrays.sort(complexAdd);
@@ -202,7 +196,6 @@ public class TimeBenchmark {
 		output += algorithmTime[n/2] + ",";
 		output += colourMapping[n/2] + ",";
 		output += pixelRender[n/2] + ",";
-		output += tileRender[n/2] + ",";
 		output += totalRender[n/2];
 		
 		try {

@@ -119,6 +119,7 @@ public class FractalExplorer extends JFrame {
         
         // Generate progress bar
         JProgressBar loadProgress = new JProgressBar();
+        majorFractal.attachProgressBar(loadProgress);
         
         // Generate view buttons
         JPanel viewButtons = new JPanel();
