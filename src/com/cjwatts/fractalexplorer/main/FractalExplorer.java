@@ -413,7 +413,6 @@ public class FractalExplorer extends JFrame {
                 // Reset ALL graph attributes (except algorithm)
                 iterationCount = iterations.getInteger();
                 majorFractal.getAlgorithm().setIterations(iterationCount);
-                minorFractal.getAlgorithm().getBase().setIterations(iterationCount);
                 majorFractal.setComplexBounds(realFrom.getDouble(), realTo.getDouble(), imaginaryFrom.getDouble(), imaginaryTo.getDouble());
             }
             

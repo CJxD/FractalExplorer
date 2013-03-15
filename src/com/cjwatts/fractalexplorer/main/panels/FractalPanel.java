@@ -107,25 +107,7 @@ public class FractalPanel extends JPanel {
         private boolean invalid = false;
         
         public RenderCache() {
-            this.hashCode = calculateHash();
-        }
-        
-        private int calculateHash() {
-            // Use prime numbers to generate a hash code
-            // This probably isn't foolproof, but it should be good enough
-            int hash = 1;
-            try {
-                hash = hash * 31 + algorithm.hashCode();
-                hash = hash * 37 + scheme.hashCode();
-            } catch (NullPointerException ignore) {
-            }
-            hash = hash * 41 + new Double(xmin).hashCode();
-            hash = hash * 43 + new Double(xmax).hashCode();
-            hash = hash * 47 + new Double(ymin).hashCode();
-            hash = hash * 53 + new Double(ymax).hashCode();
-            hash = hash * 59 + getWidth();
-            hash = hash * 61 + getHeight();
-            return hash;
+            this.hashCode = FractalPanel.this.hashCode();
         }
         
         /**
@@ -141,7 +123,7 @@ public class FractalPanel extends JPanel {
          */
         public boolean isDirty() {
             int oldHash = hashCode;
-            hashCode = calculateHash();
+            hashCode = FractalPanel.this.hashCode();
             
             return invalid || oldHash != hashCode;
         }
@@ -378,5 +360,68 @@ public class FractalPanel extends JPanel {
         this.algorithm = algorithm;
         this.repaint();
     }
+
+	/* 
+	 * Generated hash code function
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((algorithm == null) ? 0 : algorithm.hashCode());
+		result = prime * result + ((scheme == null) ? 0 : scheme.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(xmax);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(xmin);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(ymax);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(ymin);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	/*
+	 * Generated equals function
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FractalPanel other = (FractalPanel) obj;
+		if (algorithm == null) {
+			if (other.algorithm != null)
+				return false;
+		} else if (!algorithm.equals(other.algorithm))
+			return false;
+		if (scheme == null) {
+			if (other.scheme != null)
+				return false;
+		} else if (!scheme.equals(other.scheme))
+			return false;
+		if (Double.doubleToLongBits(xmax) != Double
+				.doubleToLongBits(other.xmax))
+			return false;
+		if (Double.doubleToLongBits(xmin) != Double
+				.doubleToLongBits(other.xmin))
+			return false;
+		if (Double.doubleToLongBits(ymax) != Double
+				.doubleToLongBits(other.ymax))
+			return false;
+		if (Double.doubleToLongBits(ymin) != Double
+				.doubleToLongBits(other.ymin))
+			return false;
+		return true;
+	}
     
 }

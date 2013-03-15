@@ -85,8 +85,8 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         	return (d - (Math.log(Math.log(modSquared))) / LOG_2) / (iterations);
         }
     }
-    
-    /**
+
+	/**
      * @return Name of the algorithm
      */
     public abstract String getName();
@@ -107,4 +107,42 @@ public abstract class BaseFractalAlgorithm extends FractalAlgorithm {
         this.escapeRadius = escapeRadius;
         this.escapeSquared = Math.pow(escapeRadius, 2);
     }
+    
+    /*
+	 * Generated hash code function
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(escapeRadius);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + iterations;
+		return result;
+	}
+
+    /*
+	 * Generated equals function
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BaseFractalAlgorithm other = (BaseFractalAlgorithm) obj;
+		if (Double.doubleToLongBits(escapeRadius) != Double
+				.doubleToLongBits(other.escapeRadius))
+			return false;
+		if (iterations != other.iterations)
+			return false;
+		return true;
+	}
 }
