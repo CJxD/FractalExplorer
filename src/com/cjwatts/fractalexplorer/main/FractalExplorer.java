@@ -28,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
@@ -65,10 +64,7 @@ public class FractalExplorer extends JFrame {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException ex) {
-        } catch (InstantiationException ex) {
-        } catch (IllegalAccessException ex) {
-        } catch (UnsupportedLookAndFeelException ex) {
+        } catch (Exception ignore) {
         }
         
         // Load favourites
@@ -487,7 +483,15 @@ public class FractalExplorer extends JFrame {
                         // If the entry doesn't exist, add it to the combo box
                         favourites.addItem(selected.toString());
                     }
-                    favouriteList.add(new Favourite(selected.toString(), majorFractal.getAlgorithm(), lastSelected, majorFractal.getColourScheme()));
+                    favouriteList.add(new Favourite(
+                            selected.toString(),
+                            majorFractal.getAlgorithm(),
+                            lastSelected,
+                            new Complex[] {
+                                new Complex(realFrom.getDouble(), imaginaryFrom.getDouble()),
+                                new Complex(realTo.getDouble(), imaginaryTo.getDouble())
+                            },
+                            majorFractal.getColourScheme()));
                     ;
                 }
             }
@@ -520,6 +524,12 @@ public class FractalExplorer extends JFrame {
                         minorFractal.setAlgorithm(new JuliaAlgorithm(algorithm, lastSelected));
                         majorFractal.setColourScheme(scheme);
                         minorFractal.setColourScheme(scheme);
+                        
+                        Complex[] bounds = f.getBounds();
+                        realFrom.setValue(bounds[0].real());
+                        imaginaryFrom.setValue(bounds[0].imaginary());
+                        realTo.setValue(bounds[1].real());
+                        imaginaryTo.setValue(bounds[1].imaginary());
                     }
                 }
             }

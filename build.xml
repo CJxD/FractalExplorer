@@ -3,16 +3,16 @@
     <!--this file was created by Eclipse Runnable JAR Export Wizard-->
     <!--ANT 1.7 is required                                        -->
     <target name="create_run_jar">
-        <jar destfile="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/bin/Fractal Explorer.jar" filesetmanifest="mergewithoutmain">
+        <jar destfile="bin/Fractal Explorer.jar" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="com.cjwatts.fractalexplorer.main.FractalExplorer"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <fileset dir="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/bin"/>
+            <fileset dir="bin"/>
             <zipfileset excludes="META-INF/*.SF" src="C:/Program Files/Eclipse/plugins/org.junit_3.8.2.v3_8_2_v20100427-1100/junit.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/reflections-0.9.8.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/guava-11.0.2.jar"/>
-            <zipfileset excludes="META-INF/*.SF" src="D:/Users.old/Chris/Documents/GitHub/FractalExplorer/lib/javassist-3.12.1.GA.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="lib/reflections-0.9.8.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="lib/guava-11.0.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="lib/javassist-3.12.1.GA.jar"/>
         </jar>
     </target>
 </project>

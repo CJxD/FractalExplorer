@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 import com.cjwatts.fractalexplorer.main.FractalColourScheme;
 import com.cjwatts.fractalexplorer.main.algorithms.BaseFractalAlgorithm;
 import com.cjwatts.fractalexplorer.main.algorithms.MandelbrotAlgorithm;
+import com.cjwatts.fractalexplorer.main.panels.FractalPanel;
 import com.cjwatts.fractalexplorer.main.util.Complex;
 
 /**
@@ -71,6 +72,7 @@ public class Favourites implements List<Favourite> {
             String name = null;
             BaseFractalAlgorithm algorithm = null;
             Complex selected = null;
+            Complex[] bounds = new Complex[2];
             FractalColourScheme scheme = null;
             
             for (int i = 0; i < l0.getLength(); i++) {
@@ -130,6 +132,59 @@ public class Favourites implements List<Favourite> {
                         selected = new Complex(sReal, sImaginary);
                     }
                     // </selected>
+                    // <bounds>
+                    if (n2.getNodeName().equals("bounds")) {
+                        l2 = n2.getChildNodes();
+                        
+                        // Attibutes to attain
+                        Double aReal = null, aImaginary = null;
+                        Double bReal = null, bImaginary = null;
+                        
+                        for (int k = 0; k < l2.getLength(); k++) {
+                            n3 = l2.item(k);
+                            // <bottomleft>
+                            if (n3.getNodeName().equals("bottomleft")) {
+                                l3 = n3.getChildNodes();
+                                for (int l = 0; l < l3.getLength(); l++) {
+                                    n4 = l3.item(l);
+                                    // <real>
+                                    if (n4.getNodeName().equals("real")) {
+                                        aReal = Double.parseDouble(n4.getTextContent());
+                                    }
+                                    // <imaginary>
+                                    else if (n4.getNodeName().equals("imaginary")) {
+                                        aImaginary = Double.parseDouble(n4.getTextContent());
+                                    }
+                                }
+                            }
+                            // </bottomleft>
+                            // <topright>
+                            else if (n3.getNodeName().equals("topright")) {
+                                l3 = n3.getChildNodes();
+                                for (int l = 0; l < l2.getLength(); l++) {
+                                    n4 = l3.item(l);
+                                    // <real>
+                                    if (n4.getNodeName().equals("real")) {
+                                        bReal = Double.parseDouble(n4.getTextContent());
+                                    }
+                                    // <imaginary>
+                                    else if (n4.getNodeName().equals("imaginary")) {
+                                        bImaginary = Double.parseDouble(n4.getTextContent());
+                                    }
+                                }
+                            }
+                            //</topright>
+                        }
+                        if (aReal == null || aImaginary == null || bReal == null || bImaginary == null) {
+                            aReal = FractalPanel.DEFAULT_REAL_MIN;
+                            aImaginary = FractalPanel.DEFAULT_IMAGINARY_MIN;
+                            bReal = FractalPanel.DEFAULT_REAL_MAX;
+                            bImaginary = FractalPanel.DEFAULT_IMAGINARY_MAX;
+                        }
+                        bounds[0] = new Complex(aReal, aImaginary);
+                        bounds[1] = new Complex(bReal, bImaginary);
+                    }
+                    // </bounds>
                     // <scheme>
                     if (n2.getNodeName().equals("scheme")) {
                         l2 = n2.getChildNodes();
@@ -177,7 +232,7 @@ public class Favourites implements List<Favourite> {
                     // </scheme>
                 }
                 // Commit the data
-                loaded.add(new Favourite(name, algorithm, selected, scheme));
+                loaded.add(new Favourite(name, algorithm, selected, bounds, scheme));
             }
             // Request a cleanup of all those objects now
             System.gc();
@@ -246,6 +301,33 @@ public class Favourites implements List<Favourite> {
                 e3.appendChild(doc.createTextNode(f.getSelected().imaginary() + ""));
                 e2.appendChild(e3);
                 // </selected>
+                // <bounds>
+                e2 = doc.createElement("bounds");
+                // <bottomleft>
+                e3 = doc.createElement("bottomleft");
+                // <real>
+                e4 = doc.createElement("real");
+                e4.appendChild(doc.createTextNode(f.getBounds()[0].real() + ""));
+                e3.appendChild(e4);
+                // <imaginary>
+                e4 = doc.createElement("imaginary");
+                e4.appendChild(doc.createTextNode(f.getBounds()[0].imaginary() + ""));
+                e3.appendChild(e4);
+                e2.appendChild(e3);
+                // </bottomleft>
+                // <topright>
+                e3 = doc.createElement("topright");
+                // <real>
+                e4 = doc.createElement("real");
+                e4.appendChild(doc.createTextNode(f.getBounds()[1].real() + ""));
+                e3.appendChild(e4);
+                // <imaginary>
+                e4 = doc.createElement("imaginary");
+                e4.appendChild(doc.createTextNode(f.getBounds()[1].imaginary() + ""));
+                e3.appendChild(e4);
+                // </topright>
+                e2.appendChild(e3);
+                // </bounds>
                 e1.appendChild(e2);
                 // <scheme>
                 e2 = doc.createElement("scheme");

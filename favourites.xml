@@ -14,7 +14,7 @@
             <colours>
                 <colourstop>
                     <progress>0.0</progress>
-                    <colour>0 0 40</colour>
+                    <colour>0 0 0</colour>
                 </colourstop>
                 <colourstop>
                     <progress>0.05</progress>
@@ -52,13 +52,13 @@
         </scheme>
     </favourite>
     <favourite name="The Ship">
-        <algorithm name="Mandelbrot">
+        <algorithm name="Burning Ship">
             <iterations>100</iterations>
             <escaperadius>2.0</escaperadius>
         </algorithm>
         <selected>
-            <real>0.0</real>
-            <imaginary>0.0</imaginary>
+            <real>-1.7975198509950006</real>
+            <imaginary>-0.07796875</imaginary>
         </selected>
         <scheme>
             <gridlines>255 255 255</gridlines>

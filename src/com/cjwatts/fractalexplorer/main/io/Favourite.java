@@ -9,6 +9,7 @@ public class Favourite implements Comparable<Favourite> {
     private String name;
     private BaseFractalAlgorithm algorithm;
     private Complex selected;
+    private Complex bounds[];
     private FractalColourScheme scheme;
     
     /**
@@ -17,12 +18,14 @@ public class Favourite implements Comparable<Favourite> {
      * @param name
      * @param algorithm
      * @param selected
+     * @param bounds Index 0 = bottom left, index 1 = top right
      * @param scheme
      */
-    public Favourite(String name, BaseFractalAlgorithm algorithm, Complex selected, FractalColourScheme scheme) {
+    public Favourite(String name, BaseFractalAlgorithm algorithm, Complex selected, Complex[] bounds, FractalColourScheme scheme) {
         this.name = name;
         this.algorithm = algorithm;
         this.selected = selected;
+        this.bounds = bounds;
         this.scheme = scheme;
     }
     
@@ -53,6 +56,14 @@ public class Favourite implements Comparable<Favourite> {
     
     public void setSelected(Complex selected) {
         this.selected = selected;
+    }
+    
+    public Complex[] getBounds() {
+        return bounds;
+    }
+    
+    public void setBounds(Complex[] bounds) {
+        this.bounds = bounds;
     }
     
     public FractalColourScheme getScheme() {
